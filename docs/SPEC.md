@@ -21,42 +21,50 @@ A local web app to help track game state while playing the board game **Frosthav
 
 ## Tech Stack
 
-| Layer | Choice |
-|---|---|
-| Language | TypeScript (strict) |
-| Framework | React |
-| Build | Vite |
-| Routing | React Router |
-| Testing | Vitest + Testing Library |
-| Persistence | JSON files on disk via Express API |
-| Backend | Express (lightweight local API server) |
-| State management | React Context + `useReducer` |
-| Package manager | pnpm |
+| Layer | Choice | Status |
+|---|---|---|
+| Language | TypeScript (strict) | ✅ |
+| Framework | React 19 | ✅ |
+| Build | Vite 7 | ✅ |
+| Routing | React Router 7 | ✅ installed, not yet used for page routing |
+| Testing | Vitest + Testing Library | ✅ |
+| Persistence | JSON files on disk via Express API | ✅ |
+| Backend | Express 5 (lightweight local API server) | ✅ |
+| State management | React Context + `useReducer` | ✅ |
+| UI | Tailwind CSS 4 + shadcn/ui components | ✅ |
+| Package manager | pnpm | ✅ |
 
 ## Architecture
 
 ```
 src/
-├── app/                  # App shell, router, layout
+├── api/                  # Client-side API helpers (fetch wrappers)
+│   └── scenarios.ts      # ✅
+├── components/ui/        # Shared UI components (shadcn/ui)
+│   ├── badge.tsx          # ✅
+│   ├── button.tsx         # ✅
+│   ├── card.tsx           # ✅
+│   ├── input.tsx          # ✅
+│   ├── label.tsx          # ✅
+│   └── toggle.tsx         # ✅
+├── data/                 # Static game reference data
+│   ├── conditions.ts      # ✅
+│   └── elements.ts        # ✅
 ├── features/
-│   ├── scenario/         # Scenario tracker (in-game phase)
-│   ├── campaign/         # Campaign & outpost phase tracking
-│   └── characters/       # Character creation & progression
-├── data/                 # Static game reference data (JSON)
-│   ├── conditions.ts
-│   ├── elements.ts
-│   └── classes/          # Starter class stats
-├── types/                # Shared TypeScript types
-└── components/           # Shared UI components
+│   ├── scenario/         # Scenario tracker (in-game phase) ✅
+│   ├── campaign/         # Campaign & outpost phase tracking (planned)
+│   └── characters/       # Character creation & progression (planned)
+├── lib/
+│   └── utils.ts          # ✅ cn() helper
+├── types/
+│   └── scenario.ts       # ✅
+├── App.tsx               # ✅ Root component (setup ↔ tracker flow)
+└── main.tsx              # ✅ Entry point
 
 server/
-├── index.ts              # Express app entry point
-├── routes/               # API route handlers
-└── storage.ts            # File system read/write helpers
+└── index.ts              # ✅ Express API (scenarios CRUD + file persistence)
 
 game-data/                # Persisted game state (JSON files, gitignored)
-├── campaigns/
-│   └── {campaign-id}.json
 └── scenarios/
     └── {session-id}.json
 ```
@@ -97,9 +105,24 @@ game-data/                # Persisted game state (JSON files, gitignored)
 
 ## Feature Slices
 
-### Slice 1: Scenario Tracker MVP
+### Slice 1: Scenario Tracker MVP ✅
 
-See [docs/features/scenario-tracker.md](./features/scenario-tracker.md)
+See [docs/features/scenario-tracker.md](./features/scenario-tracker.md) for detailed spec and acceptance criteria.
+
+**Implemented:**
+- Scenario setup form (name, characters, monster groups with standees)
+- Round counter with element auto-decay
+- Character HP/XP tracking with condition toggles
+- Monster group tracking with per-standee HP, conditions, kill/spawn
+- Element board (6 elements, click to toggle Strong/Inert, auto-decay on round advance)
+- Express API with JSON file persistence (`game-data/scenarios/`)
+- Auto-save on every state change, auto-load latest session on mount
+- Reducer with full test coverage (`scenarioReducer.test.ts`)
+- UI built with Tailwind CSS + shadcn/ui components
+
+**Not yet implemented from spec:**
+- React Router page routing (currently single-page conditional render)
+- Resume/select from multiple saved sessions (auto-loads latest only)
 
 ### Slice 2: Initiative & Turn Order (planned)
 

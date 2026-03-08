@@ -214,17 +214,43 @@ DELETE /api/scenarios/:id      # Delete a session
 
 ## Acceptance Criteria
 
-- [ ] Can create a new scenario session with a name, characters, and monster groups
-- [ ] Round counter increments/decrements correctly
-- [ ] Element board displays all 6 elements with correct states
-- [ ] Elements decay on round advance (Strong → Waning → Inert)
-- [ ] Can manually set element to Strong or Inert
-- [ ] Character HP increments/decrements, clamped to 0–maxHp
-- [ ] Character XP increments/decrements, minimum 0
-- [ ] Conditions can be toggled on/off per character
-- [ ] Monster standees track individual HP and conditions
-- [ ] Standees can be killed (marked dead, removed from active view)
-- [ ] New standees/groups can be added mid-scenario
-- [ ] State survives page reload (loaded from JSON file on disk)
-- [ ] Can end/discard a session
-- [ ] Visual indicators for exhausted characters and dead monsters
+- [x] Can create a new scenario session with a name, characters, and monster groups
+- [x] Round counter increments/decrements correctly
+- [x] Element board displays all 6 elements with correct states
+- [x] Elements decay on round advance (Strong → Waning → Inert)
+- [x] Can manually set element to Strong or Inert
+- [x] Character HP increments/decrements, clamped to 0–maxHp
+- [x] Character XP increments/decrements, minimum 0
+- [x] Conditions can be toggled on/off per character
+- [x] Monster standees track individual HP and conditions
+- [x] Standees can be killed (marked dead, removed from active view)
+- [x] New standees/groups can be added mid-scenario
+- [x] State survives page reload (loaded from JSON file on disk)
+- [x] Can end/discard a session
+- [x] Visual indicators for exhausted characters and dead monsters
+
+## Implementation Notes
+
+### What was built
+
+| Component | File | Description |
+|---|---|---|
+| Types | `src/types/scenario.ts` | All data types as specced |
+| Reducer | `src/features/scenario/scenarioReducer.ts` | All actions implemented per spec |
+| Tests | `src/features/scenario/scenarioReducer.test.ts` | Full coverage of all reducer actions |
+| Context | `src/features/scenario/ScenarioContext.tsx` | Provider with auto-save/load via API |
+| API client | `src/api/scenarios.ts` | Fetch wrappers for all CRUD endpoints |
+| Server | `server/index.ts` | Express 5 API with file-based JSON persistence |
+| Setup UI | `src/features/scenario/ScenarioSetup.tsx` | Form for creating new scenarios |
+| Tracker UI | `src/features/scenario/ScenarioTracker.tsx` | Main tracker layout |
+| Round | `src/features/scenario/RoundTracker.tsx` | Round increment/decrement |
+| Elements | `src/features/scenario/ElementBoard.tsx` | 6-element grid with click-to-toggle |
+| Characters | `src/features/scenario/CharacterCard.tsx` | HP/XP/conditions per character |
+| Monsters | `src/features/scenario/MonsterGroupCard.tsx` | Group-level card with standee management |
+| Standees | `src/features/scenario/MonsterStandeeRow.tsx` | Per-standee HP/conditions/kill |
+
+### Deferred items
+
+- React Router page routing (app uses conditional render in `App.tsx` instead)
+- Session picker (auto-loads most recent session; no UI to choose from multiple)
+- Ally/summon tracking
