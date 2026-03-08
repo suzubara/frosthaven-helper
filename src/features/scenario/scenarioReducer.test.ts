@@ -16,6 +16,7 @@ function createTestSession(overrides: Partial<ScenarioSession> = {}): ScenarioSe
     elements: createDefaultElements(),
     characters: [],
     monsterGroups: [],
+    currentTurnIndex: null,
     createdAt: 1000,
     updatedAt: 1000,
     ...overrides,
@@ -30,6 +31,8 @@ function createTestCharacter(overrides: Partial<CharacterState> = {}): Character
     currentHp: 10,
     xp: 0,
     conditions: [],
+    initiative: null,
+    longRest: false,
     ...overrides,
   }
 }
@@ -41,6 +44,7 @@ function createTestMonsterGroup(overrides: Partial<MonsterGroup> = {}): MonsterG
     maxHpNormal: 5,
     maxHpElite: 9,
     standees: [],
+    initiative: null,
     ...overrides,
   }
 }
@@ -419,6 +423,134 @@ describe('scenarioReducer', () => {
       const state = createTestSession()
       const result = scenarioReducer(state, { type: 'END_SESSION' })
       expect(result).toBeNull()
+    })
+  })
+
+  describe('SET_CHARACTER_INITIATIVE', () => {
+    it('should set initiative for a character', () => {
+      const character = createTestCharacter()
+      const state = createTestSession({ characters: [character] })
+      const result = scenarioReducer(state, {
+        type: 'SET_CHARACTER_INITIATIVE',
+        characterId: 'char-1',
+        initiative: 15,
+      })
+      expect(result?.characters[0].initiative).toBe(15)
+    })
+
+    it('should clear longRest when setting initiative', () => {
+      const character = createTestCharacter({ longRest: true })
+      const state = createTestSession({ characters: [character] })
+      const result = scenarioReducer(state, {
+        type: 'SET_CHARACTER_INITIATIVE',
+        characterId: 'char-1',
+        initiative: 15,
+      })
+      expect(result?.characters[0].longRest).toBe(false)
+    })
+  })
+
+  describe('SET_CHARACTER_LONG_REST', () => {
+    it('should set longRest to true and initiative to null', () => {
+      const character = createTestCharacter({ initiative: 15 })
+      const state = createTestSession({ characters: [character] })
+      const result = scenarioReducer(state, {
+        type: 'SET_CHARACTER_LONG_REST',
+        characterId: 'char-1',
+      })
+      expect(result?.characters[0].longRest).toBe(true)
+      expect(result?.characters[0].initiative).toBeNull()
+    })
+  })
+
+  describe('CLEAR_CHARACTER_INITIATIVE', () => {
+    it('should reset initiative and longRest', () => {
+      const character = createTestCharacter({ initiative: 15, longRest: true })
+      const state = createTestSession({ characters: [character] })
+      const result = scenarioReducer(state, {
+        type: 'CLEAR_CHARACTER_INITIATIVE',
+        characterId: 'char-1',
+      })
+      expect(result?.characters[0].initiative).toBeNull()
+      expect(result?.characters[0].longRest).toBe(false)
+    })
+  })
+
+  describe('SET_MONSTER_INITIATIVE', () => {
+    it('should set initiative for a monster group', () => {
+      const group = createTestMonsterGroup()
+      const state = createTestSession({ monsterGroups: [group] })
+      const result = scenarioReducer(state, {
+        type: 'SET_MONSTER_INITIATIVE',
+        groupId: 'group-1',
+        initiative: 42,
+      })
+      expect(result?.monsterGroups[0].initiative).toBe(42)
+    })
+  })
+
+  describe('CLEAR_MONSTER_INITIATIVE', () => {
+    it('should clear initiative for a monster group', () => {
+      const group = createTestMonsterGroup({ initiative: 42 })
+      const state = createTestSession({ monsterGroups: [group] })
+      const result = scenarioReducer(state, {
+        type: 'CLEAR_MONSTER_INITIATIVE',
+        groupId: 'group-1',
+      })
+      expect(result?.monsterGroups[0].initiative).toBeNull()
+    })
+  })
+
+  describe('START_ROUND', () => {
+    it('should set currentTurnIndex to 0', () => {
+      const state = createTestSession()
+      const result = scenarioReducer(state, { type: 'START_ROUND' })
+      expect(result?.currentTurnIndex).toBe(0)
+    })
+  })
+
+  describe('NEXT_TURN', () => {
+    it('should increment currentTurnIndex', () => {
+      const state = createTestSession({ currentTurnIndex: 0 })
+      const result = scenarioReducer(state, { type: 'NEXT_TURN' })
+      expect(result?.currentTurnIndex).toBe(1)
+    })
+
+    it('should go from null to 0', () => {
+      const state = createTestSession({ currentTurnIndex: null })
+      const result = scenarioReducer(state, { type: 'NEXT_TURN' })
+      expect(result?.currentTurnIndex).toBe(0)
+    })
+  })
+
+  describe('PREVIOUS_TURN', () => {
+    it('should decrement currentTurnIndex', () => {
+      const state = createTestSession({ currentTurnIndex: 2 })
+      const result = scenarioReducer(state, { type: 'PREVIOUS_TURN' })
+      expect(result?.currentTurnIndex).toBe(1)
+    })
+
+    it('should not go below 0', () => {
+      const state = createTestSession({ currentTurnIndex: 0 })
+      const result = scenarioReducer(state, { type: 'PREVIOUS_TURN' })
+      expect(result?.currentTurnIndex).toBe(0)
+    })
+  })
+
+  describe('ADVANCE_ROUND (initiative reset)', () => {
+    it('should reset all initiative values and currentTurnIndex', () => {
+      const char = createTestCharacter({ initiative: 15, longRest: true })
+      const group = createTestMonsterGroup({ initiative: 42 })
+      const state = createTestSession({
+        characters: [char],
+        monsterGroups: [group],
+        currentTurnIndex: 3,
+      })
+      const result = scenarioReducer(state, { type: 'ADVANCE_ROUND' })
+      expect(result?.characters[0].initiative).toBeNull()
+      expect(result?.characters[0].longRest).toBe(false)
+      expect(result?.monsterGroups[0].initiative).toBeNull()
+      expect(result?.currentTurnIndex).toBeNull()
     })
   })
 })

@@ -24,6 +24,8 @@ export const FullHealth: Story = {
       currentHp: 10,
       xp: 0,
       conditions: [],
+      initiative: null,
+      longRest: false,
     },
   },
 }
@@ -37,6 +39,8 @@ export const LowHp: Story = {
       currentHp: 2,
       xp: 4,
       conditions: ['poison'],
+      initiative: null,
+      longRest: false,
     },
   },
 }
@@ -50,6 +54,8 @@ export const Exhausted: Story = {
       currentHp: 0,
       xp: 7,
       conditions: ['wound', 'muddle'],
+      initiative: null,
+      longRest: false,
     },
   },
 }
@@ -63,6 +69,8 @@ export const ManyConditions: Story = {
       currentHp: 10,
       xp: 3,
       conditions: ['poison', 'wound', 'stun', 'strengthen', 'invisible'],
+      initiative: null,
+      longRest: false,
     },
   },
 }

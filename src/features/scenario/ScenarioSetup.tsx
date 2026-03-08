@@ -147,6 +147,8 @@ export function ScenarioSetup({
         currentHp: c.maxHp,
         xp: 0,
         conditions: [],
+        initiative: null,
+        longRest: false,
       })),
       monsterGroups: monsterGroups.map((g) => ({
         id: crypto.randomUUID(),
@@ -161,7 +163,9 @@ export function ScenarioSetup({
           conditions: [],
           alive: true,
         })),
+        initiative: null,
       })),
+      currentTurnIndex: null,
       createdAt: now,
       updatedAt: now,
     }

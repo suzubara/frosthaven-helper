@@ -15,6 +15,7 @@ export interface ScenarioSession {
   elements: Record<ElementName, ElementState>
   characters: CharacterState[]
   monsterGroups: MonsterGroup[]
+  currentTurnIndex: number | null
   createdAt: number
   updatedAt: number
 }
@@ -26,6 +27,8 @@ export interface CharacterState {
   currentHp: number
   xp: number
   conditions: Condition[]
+  initiative: number | null
+  longRest: boolean
 }
 
 export interface MonsterGroup {
@@ -34,6 +37,7 @@ export interface MonsterGroup {
   maxHpNormal: number
   maxHpElite: number
   standees: MonsterStandee[]
+  initiative: number | null
 }
 
 export interface MonsterStandee {
