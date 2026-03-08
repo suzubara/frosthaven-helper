@@ -1,33 +1,24 @@
-import { ScenarioProvider, useScenario } from '@/features/scenario/ScenarioContext'
-import { ScenarioSetup } from '@/features/scenario/ScenarioSetup'
-import { ScenarioTracker } from '@/features/scenario/ScenarioTracker'
-
-function ScenarioApp() {
-  const { session, dispatch, isLoading } = useScenario()
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground">Loading…</p>
-      </div>
-    )
-  }
-
-  if (!session) {
-    return (
-      <ScenarioSetup
-        onStart={(s) => dispatch({ type: 'LOAD_SESSION', session: s })}
-      />
-    )
-  }
-
-  return <ScenarioTracker />
-}
+import { Link, Outlet } from 'react-router'
 
 export default function App() {
   return (
-    <ScenarioProvider>
-      <ScenarioApp />
-    </ScenarioProvider>
+    <div className="min-h-screen">
+      <header className="border-b bg-card">
+        <nav className="mx-auto flex max-w-4xl items-center gap-4 px-6 py-3">
+          <Link to="/" className="text-lg font-bold">
+            Frosthaven Helper
+          </Link>
+          <Link to="/scenario" className="text-sm hover:underline">
+            Scenario
+          </Link>
+          <Link to="/campaigns" className="text-sm hover:underline">
+            Campaigns
+          </Link>
+        </nav>
+      </header>
+      <main>
+        <Outlet />
+      </main>
+    </div>
   )
 }
