@@ -24,6 +24,7 @@ export const Default: Story = {
       name: 'Living Bones',
       maxHpNormal: 5,
       maxHpElite: 9,
+      initiative: null,
       standees: [
         {
           id: 's1',
@@ -61,6 +62,7 @@ export const EmptyGroup: Story = {
       name: 'Frost Demons',
       maxHpNormal: 6,
       maxHpElite: 10,
+      initiative: null,
       standees: [],
     },
   },
@@ -73,6 +75,7 @@ export const AllDead: Story = {
       name: 'Living Spirits',
       maxHpNormal: 4,
       maxHpElite: 7,
+      initiative: null,
       standees: [
         {
           id: 's1',

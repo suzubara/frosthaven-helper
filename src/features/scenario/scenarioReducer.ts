@@ -26,6 +26,14 @@ export type ScenarioAction =
   | { type: 'KILL_STANDEE'; groupId: string; standeeId: string }
   | { type: 'LOAD_SESSION'; session: ScenarioSession }
   | { type: 'END_SESSION' }
+  | { type: 'SET_CHARACTER_INITIATIVE'; characterId: string; initiative: number }
+  | { type: 'SET_CHARACTER_LONG_REST'; characterId: string }
+  | { type: 'CLEAR_CHARACTER_INITIATIVE'; characterId: string }
+  | { type: 'SET_MONSTER_INITIATIVE'; groupId: string; initiative: number }
+  | { type: 'CLEAR_MONSTER_INITIATIVE'; groupId: string }
+  | { type: 'START_ROUND' }
+  | { type: 'NEXT_TURN' }
+  | { type: 'PREVIOUS_TURN' }
 
 export const initialState: ScenarioSession | null = null
 
@@ -93,6 +101,16 @@ export function scenarioReducer(
         ...state,
         round: state.round + 1,
         elements: decayElements(state.elements),
+        characters: state.characters.map((c) => ({
+          ...c,
+          initiative: null,
+          longRest: false,
+        })),
+        monsterGroups: state.monsterGroups.map((g) => ({
+          ...g,
+          initiative: null,
+        })),
+        currentTurnIndex: null,
       }
 
     case 'REWIND_ROUND':
@@ -217,6 +235,72 @@ export function scenarioReducer(
             alive: false,
           })),
         })),
+      }
+
+    case 'SET_CHARACTER_INITIATIVE':
+      return {
+        ...state,
+        characters: updateCharacter(state.characters, action.characterId, (c) => ({
+          ...c,
+          initiative: action.initiative,
+          longRest: false,
+        })),
+      }
+
+    case 'SET_CHARACTER_LONG_REST':
+      return {
+        ...state,
+        characters: updateCharacter(state.characters, action.characterId, (c) => ({
+          ...c,
+          initiative: null,
+          longRest: true,
+        })),
+      }
+
+    case 'CLEAR_CHARACTER_INITIATIVE':
+      return {
+        ...state,
+        characters: updateCharacter(state.characters, action.characterId, (c) => ({
+          ...c,
+          initiative: null,
+          longRest: false,
+        })),
+      }
+
+    case 'SET_MONSTER_INITIATIVE':
+      return {
+        ...state,
+        monsterGroups: updateMonsterGroup(state.monsterGroups, action.groupId, (g) => ({
+          ...g,
+          initiative: action.initiative,
+        })),
+      }
+
+    case 'CLEAR_MONSTER_INITIATIVE':
+      return {
+        ...state,
+        monsterGroups: updateMonsterGroup(state.monsterGroups, action.groupId, (g) => ({
+          ...g,
+          initiative: null,
+        })),
+      }
+
+    case 'START_ROUND':
+      return {
+        ...state,
+        currentTurnIndex: 0,
+      }
+
+    case 'NEXT_TURN':
+      return {
+        ...state,
+        currentTurnIndex: (state.currentTurnIndex ?? -1) + 1,
+      }
+
+    case 'PREVIOUS_TURN':
+      return {
+        ...state,
+        currentTurnIndex: Math.max(0, (state.currentTurnIndex ?? 0) - 1),
       }
 
     default:

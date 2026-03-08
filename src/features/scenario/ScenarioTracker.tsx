@@ -18,6 +18,7 @@ export function ScenarioTracker() {
       maxHpNormal: 5,
       maxHpElite: 8,
       standees: [],
+      initiative: null,
     }
     dispatch({ type: 'ADD_MONSTER_GROUP', group })
   }
