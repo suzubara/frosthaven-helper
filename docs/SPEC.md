@@ -118,19 +118,24 @@ See [docs/features/scenario-tracker.md](./features/scenario-tracker.md) for deta
 - UI built with Tailwind CSS + shadcn/ui components
 - React Router page routing at `/scenario` ✅
 - Accepts preloaded characters from campaign roster via `?campaignId=` query param ✅
+- Initiative & turn order tracking (Slice 2) ✅
 
 **Not yet implemented from spec:**
 - Resume/select from multiple saved sessions (auto-loads latest only)
 
-### Slice 2: Initiative & Turn Order (next up)
+### Slice 2: Initiative & Turn Order ✅
 
 See [docs/features/initiative-turn-order.md](./features/initiative-turn-order.md) for detailed spec and acceptance criteria.
 
-- Initiative value entry (1–99) per character + monster group
+**Implemented:**
+- Initiative value entry (1–99) per character + monster group (`InitiativeInput.tsx`)
 - Long rest auto-sets initiative to 99
-- Sorted turn order display with current turn highlighting
-- Next/previous turn controls
-- Round advance resets all initiative and turn state
+- Sorted turn order display with current/acted/pending states (`TurnOrderPanel.tsx`)
+- Turn order sort logic with tests (`turnOrder.ts`, `turnOrder.test.ts`)
+- Next/previous turn controls, "Next Round" prompt when all turns complete
+- Round advance resets all initiative values, long rest flags, and turn position
+- New reducer actions with full test coverage
+- Storybook stories for new components
 
 ### Slice 3: Campaign & Outpost Tracking ✅
 

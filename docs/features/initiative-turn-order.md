@@ -208,50 +208,50 @@ function getSortedTurnOrder(
 
 ## Acceptance Criteria
 
-- [ ] Can set initiative (1–99) for each character
-- [ ] Can set initiative for each monster group
-- [ ] Can mark a character as long resting (initiative auto-set to 99)
-- [ ] Can clear/reset a character's or monster's initiative
-- [ ] Turn order displays all figures sorted by initiative (ascending)
-- [ ] Figures without initiative appear at the bottom
-- [ ] Ties show characters before monsters
-- [ ] Can start the round (locks turn order, highlights first figure)
-- [ ] Can advance to next turn
-- [ ] Can go back to previous turn
-- [ ] Current turn is visually highlighted
-- [ ] Acted figures are visually distinct from pending figures
-- [ ] Advancing round resets all initiative values, long rest flags, and turn position
-- [ ] Turn order state persists via existing auto-save
-- [ ] Initiative inputs accept numeric values only
-- [ ] Long rest characters show a visual indicator (💤 or similar)
+- [x] Can set initiative (1–99) for each character
+- [x] Can set initiative for each monster group
+- [x] Can mark a character as long resting (initiative auto-set to 99)
+- [x] Can clear/reset a character's or monster's initiative
+- [x] Turn order displays all figures sorted by initiative (ascending)
+- [x] Figures without initiative appear at the bottom
+- [x] Ties show characters before monsters
+- [x] Can start the round (locks turn order, highlights first figure)
+- [x] Can advance to next turn
+- [x] Can go back to previous turn
+- [x] Current turn is visually highlighted
+- [x] Acted figures are visually distinct from pending figures
+- [x] Advancing round resets all initiative values, long rest flags, and turn position
+- [x] Turn order state persists via existing auto-save
+- [x] Initiative inputs accept numeric values only
+- [x] Long rest characters show a visual indicator (💤 or similar)
 
 ---
 
 ## Implementation Plan
 
-### Phase 1: Data Model & Reducer
+### Phase 1: Data Model & Reducer ✅
 
-1. **Update `ScenarioSession` type** — add `currentTurnIndex` field
-2. **Update `CharacterState` type** — add `initiative` and `longRest` fields
-3. **Update `MonsterGroup` type** — add `initiative` field
-4. **Add new reducer actions** — initiative set/clear, turn order navigation
-5. **Update `ADVANCE_ROUND`** — reset initiative, longRest, currentTurnIndex
-6. **Update `ScenarioSetup`** — initialize new fields when creating a session
-7. **Write reducer tests** — full coverage for new actions
+1. ✅ **Update `ScenarioSession` type** — added `currentTurnIndex` field
+2. ✅ **Update `CharacterState` type** — added `initiative` and `longRest` fields
+3. ✅ **Update `MonsterGroup` type** — added `initiative` field
+4. ✅ **Add new reducer actions** — initiative set/clear, turn order navigation
+5. ✅ **Update `ADVANCE_ROUND`** — resets initiative, longRest, currentTurnIndex
+6. ✅ **Update `ScenarioSetup`** — initializes new fields when creating a session
+7. ✅ **Write reducer tests** — full coverage for new actions
 
-### Phase 2: Turn Order Logic
+### Phase 2: Turn Order Logic ✅
 
-8. **Create `turnOrder.ts`** — `getSortedTurnOrder()` helper + tests
-9. **Create `TurnOrderPanel` component** — sorted list with current turn highlighting
+8. ✅ **Create `turnOrder.ts`** — `getSortedTurnOrder()` helper + tests (`turnOrder.test.ts`)
+9. ✅ **Create `TurnOrderPanel` component** — sorted list with current turn highlighting
 
-### Phase 3: Initiative Input UI
+### Phase 3: Initiative Input UI ✅
 
-10. **Create `InitiativeInput` component** — number input for initiative per figure
-11. **Add long rest toggle** for characters
-12. **Wire into `ScenarioTracker`** — add turn order panel and initiative inputs to the layout
+10. ✅ **Create `InitiativeInput` component** — number input for initiative per figure
+11. ✅ **Add long rest toggle** for characters
+12. ✅ **Wire into `ScenarioTracker`** — turn order panel and initiative inputs in layout
 
-### Phase 4: Polish
+### Phase 4: Polish ✅
 
-13. **"All turns complete" prompt** — suggest advancing to next round
-14. **Visual polish** — acted/pending/current states, long rest indicator
-15. **Storybook stories** — TurnOrderPanel, InitiativeInput
+13. ✅ **"All turns complete" prompt** — "Next Round →" button appears when all turns done
+14. ✅ **Visual polish** — acted (✅ + dimmed), current (▶️ + ring), pending (○) states, 💤 long rest indicator
+15. ✅ **Storybook stories** — `TurnOrderPanel.stories.tsx`, `InitiativeInput.stories.tsx`
