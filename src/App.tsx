@@ -1,35 +1,33 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { ScenarioProvider, useScenario } from '@/features/scenario/ScenarioContext'
+import { ScenarioSetup } from '@/features/scenario/ScenarioSetup'
+import { ScenarioTracker } from '@/features/scenario/ScenarioTracker'
 
-function App() {
-  const [count, setCount] = useState(0)
+function ScenarioApp() {
+  const { session, dispatch, isLoading } = useScenario()
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-muted-foreground">Loading…</p>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    )
+  }
+
+  if (!session) {
+    return (
+      <ScenarioSetup
+        onStart={(s) => dispatch({ type: 'LOAD_SESSION', session: s })}
+      />
+    )
+  }
+
+  return <ScenarioTracker />
 }
 
-export default App
+export default function App() {
+  return (
+    <ScenarioProvider>
+      <ScenarioApp />
+    </ScenarioProvider>
+  )
+}
