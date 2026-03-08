@@ -10,6 +10,7 @@ interface TurnOrderPanelProps {
   onStartRound: () => void
   onNextTurn: () => void
   onPreviousTurn: () => void
+  onAdvanceRound: () => void
 }
 
 export function TurnOrderPanel({
@@ -18,6 +19,7 @@ export function TurnOrderPanel({
   onStartRound,
   onNextTurn,
   onPreviousTurn,
+  onAdvanceRound,
 }: TurnOrderPanelProps) {
   const roundStarted = currentTurnIndex !== null
   const allTurnsComplete = roundStarted && currentTurnIndex >= turnOrder.length
@@ -97,9 +99,9 @@ export function TurnOrderPanel({
               Next ▶
             </Button>
             {allTurnsComplete && (
-              <span className="text-muted-foreground ml-2 text-sm">
-                All turns complete — advance to next round
-              </span>
+              <Button size="sm" className="ml-auto" onClick={onAdvanceRound}>
+                Next Round →
+              </Button>
             )}
           </div>
         )}

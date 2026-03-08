@@ -1,8 +1,12 @@
+import { useMemo } from 'react'
 import { useScenario } from '@/features/scenario/ScenarioContext'
 import { RoundTracker } from '@/features/scenario/RoundTracker'
 import { ElementBoard } from '@/features/scenario/ElementBoard'
 import { CharacterCard } from '@/features/scenario/CharacterCard'
 import { MonsterGroupCard } from '@/features/scenario/MonsterGroupCard'
+import { TurnOrderPanel } from '@/features/scenario/TurnOrderPanel'
+import { InitiativeInput } from '@/features/scenario/InitiativeInput'
+import { getSortedTurnOrder } from '@/features/scenario/turnOrder'
 import { Button } from '@/components/ui/button'
 import type { MonsterGroup, MonsterStandee } from '@/types/scenario'
 
@@ -10,6 +14,16 @@ export function ScenarioTracker() {
   const { session, dispatch } = useScenario()
 
   if (!session) return null
+
+  const turnOrder = useMemo(
+    () =>
+      getSortedTurnOrder(
+        session.characters,
+        session.monsterGroups,
+        session.currentTurnIndex,
+      ),
+    [session.characters, session.monsterGroups, session.currentTurnIndex],
+  )
 
   function handleAddMonsterGroup() {
     const group: MonsterGroup = {
@@ -43,6 +57,37 @@ export function ScenarioTracker() {
           </Button>
         </div>
       </div>
+
+      {/* Turn Order */}
+      <TurnOrderPanel
+        turnOrder={turnOrder}
+        currentTurnIndex={session.currentTurnIndex}
+        onStartRound={() => dispatch({ type: 'START_ROUND' })}
+        onNextTurn={() => dispatch({ type: 'NEXT_TURN' })}
+        onPreviousTurn={() => dispatch({ type: 'PREVIOUS_TURN' })}
+        onAdvanceRound={() => dispatch({ type: 'ADVANCE_ROUND' })}
+      />
+
+      {/* Initiative Input */}
+      <InitiativeInput
+        characters={session.characters}
+        monsterGroups={session.monsterGroups}
+        onSetCharacterInitiative={(characterId, initiative) =>
+          dispatch({ type: 'SET_CHARACTER_INITIATIVE', characterId, initiative })
+        }
+        onSetCharacterLongRest={(characterId) =>
+          dispatch({ type: 'SET_CHARACTER_LONG_REST', characterId })
+        }
+        onClearCharacterInitiative={(characterId) =>
+          dispatch({ type: 'CLEAR_CHARACTER_INITIATIVE', characterId })
+        }
+        onSetMonsterInitiative={(groupId, initiative) =>
+          dispatch({ type: 'SET_MONSTER_INITIATIVE', groupId, initiative })
+        }
+        onClearMonsterInitiative={(groupId) =>
+          dispatch({ type: 'CLEAR_MONSTER_INITIATIVE', groupId })
+        }
+      />
 
       {/* Element Board */}
       <ElementBoard
