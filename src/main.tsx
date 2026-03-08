@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter, Route, Routes } from 'react-router'
+import { HashRouter, Route, Routes } from 'react-router'
 import './index.css'
 import App from './App.tsx'
 import HomePage from '@/features/home/HomePage'
@@ -10,7 +10,7 @@ import CampaignPage from '@/features/campaign/CampaignPage'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route element={<App />}>
           <Route index element={<HomePage />} />
@@ -19,6 +19,6 @@ createRoot(document.getElementById('root')!).render(
           <Route path="campaign/:id" element={<CampaignPage />} />
         </Route>
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   </StrictMode>,
 )
