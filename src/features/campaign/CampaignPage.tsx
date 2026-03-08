@@ -1,4 +1,5 @@
 import { useParams } from 'react-router'
+import { Button } from '@/components/ui/button'
 import { CampaignProvider, useCampaign } from '@/features/campaign/CampaignContext'
 import { ResourceTracker } from '@/features/campaign/ResourceTracker'
 import { OutpostStats } from '@/features/campaign/OutpostStats'
@@ -8,15 +9,7 @@ import { PartyRoster } from '@/features/campaign/PartyRoster'
 import { CampaignNotes } from '@/features/campaign/CampaignNotes'
 
 function CampaignContent() {
-  const { campaign, dispatch, isLoading } = useCampaign()
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground">Loading campaign…</p>
-      </div>
-    )
-  }
+  const { campaign, dispatch, reloadCampaign } = useCampaign()
 
   if (!campaign) {
     return (
@@ -28,7 +21,12 @@ function CampaignContent() {
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-6 p-4">
-      <h1 className="text-2xl font-bold">{campaign.name}</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold">{campaign.name}</h1>
+        <Button variant="outline" size="sm" onClick={() => void reloadCampaign()}>
+          Reload
+        </Button>
+      </div>
 
       <CampaignCalendar
         calendar={campaign.calendar}

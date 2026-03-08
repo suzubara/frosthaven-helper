@@ -3,15 +3,7 @@ import { ScenarioSetup } from '@/features/scenario/ScenarioSetup'
 import { ScenarioTracker } from '@/features/scenario/ScenarioTracker'
 
 function ScenarioContent() {
-  const { session, dispatch, isLoading } = useScenario()
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground">Loading…</p>
-      </div>
-    )
-  }
+  const { session, dispatch } = useScenario()
 
   if (!session) {
     return (

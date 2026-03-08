@@ -1,7 +1,9 @@
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
+  useMemo,
   useReducer,
   useRef,
   useState,
@@ -13,12 +15,12 @@ import {
   campaignReducer,
   type CampaignAction,
 } from '@/features/campaign/campaignReducer'
-import { deleteCampaign, loadCampaign, saveCampaign } from '@/api/campaigns'
+import { loadCampaign, saveCampaign } from '@/api/campaigns'
 
 interface CampaignContextValue {
   campaign: Campaign | null
   dispatch: React.Dispatch<CampaignAction>
-  isLoading: boolean
+  reloadCampaign: () => Promise<void>
 }
 
 const CampaignContext = createContext<CampaignContextValue | null>(null)
@@ -32,19 +34,22 @@ export function CampaignProvider({
 }) {
   const [campaign, dispatch] = useReducer(campaignReducer, initialState)
   const [isLoading, setIsLoading] = useState(true)
-  const prevCampaignIdRef = useRef<string | null>(null)
+  const savedCampaignRef = useRef<Campaign | null>(null)
+
+  const reloadCampaign = useCallback(async () => {
+    const loaded = await loadCampaign(campaignId)
+    if (loaded) {
+      savedCampaignRef.current = loaded
+      dispatch({ type: 'LOAD_CAMPAIGN', campaign: loaded })
+    }
+  }, [campaignId])
 
   useEffect(() => {
     let cancelled = false
 
     async function load() {
       try {
-        const loaded = await loadCampaign(campaignId)
-        if (cancelled) return
-
-        if (loaded) {
-          dispatch({ type: 'LOAD_CAMPAIGN', campaign: loaded })
-        }
+        await reloadCampaign()
       } finally {
         if (!cancelled) {
           setIsLoading(false)
@@ -57,26 +62,31 @@ export function CampaignProvider({
     return () => {
       cancelled = true
     }
-  }, [campaignId])
+  }, [reloadCampaign])
 
   useEffect(() => {
-    if (isLoading) return
+    if (campaign === null) return
+    if (campaign === savedCampaignRef.current) return
 
-    const prevId = prevCampaignIdRef.current
-    prevCampaignIdRef.current = campaign?.id ?? null
-
-    if (campaign === null) {
-      if (prevId) {
-        void deleteCampaign(prevId)
-      }
-      return
-    }
-
+    savedCampaignRef.current = campaign
     void saveCampaign({ ...campaign, updatedAt: Date.now() })
-  }, [campaign, isLoading])
+  }, [campaign])
+
+  const value = useMemo(
+    () => ({ campaign, dispatch, reloadCampaign }),
+    [campaign, dispatch, reloadCampaign],
+  )
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-muted-foreground">Loading campaign…</p>
+      </div>
+    )
+  }
 
   return (
-    <CampaignContext value={{ campaign, dispatch, isLoading }}>
+    <CampaignContext value={value}>
       {children}
     </CampaignContext>
   )
