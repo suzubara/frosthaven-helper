@@ -8,7 +8,7 @@ A local web app to help track game state while playing the board game **Frosthav
 
 - **Scenario phase tracking** — round counter, HP, conditions, elements, initiative for all figures
 - **Campaign/outpost tracking** — calendar, resources, morale, prosperity, buildings, character progression
-- **Local-first** — runs in the browser with no server; all data persists locally via IndexedDB
+- **Local-first** — runs locally with a thin Express API; game state persists as JSON files on disk
 - **Multi-session** — save and resume campaigns and in-progress scenarios across play sessions
 
 ## Non-Goals (for now)
@@ -28,7 +28,8 @@ A local web app to help track game state while playing the board game **Frosthav
 | Build | Vite |
 | Routing | React Router |
 | Testing | Vitest + Testing Library |
-| Persistence | IndexedDB via `idb` |
+| Persistence | JSON files on disk via Express API |
+| Backend | Express (lightweight local API server) |
 | State management | React Context + `useReducer` |
 | Package manager | pnpm |
 
@@ -45,9 +46,19 @@ src/
 │   ├── conditions.ts
 │   ├── elements.ts
 │   └── classes/          # Starter class stats
-├── db/                   # IndexedDB persistence layer
 ├── types/                # Shared TypeScript types
 └── components/           # Shared UI components
+
+server/
+├── index.ts              # Express app entry point
+├── routes/               # API route handlers
+└── storage.ts            # File system read/write helpers
+
+game-data/                # Persisted game state (JSON files, gitignored)
+├── campaigns/
+│   └── {campaign-id}.json
+└── scenarios/
+    └── {session-id}.json
 ```
 
 ## Data Model Summary

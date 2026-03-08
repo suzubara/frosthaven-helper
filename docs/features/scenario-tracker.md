@@ -47,9 +47,10 @@
 
 ### Persistence
 
-- Scenario state auto-saves to IndexedDB on every state change
-- Reload the page → state is preserved
-- Can explicitly end/discard a scenario session
+- Scenario state auto-saves to disk (JSON file) via the API on every state change
+- Reload the page → state is hydrated from disk
+- Can explicitly end/discard a scenario session (deletes the file)
+- Saved files are human-readable and live in `game-data/scenarios/`
 
 ---
 
@@ -192,13 +193,22 @@ type ScenarioAction =
 
 ## Persistence Strategy
 
-- **Auto-save:** After every reducer dispatch, persist the full `ScenarioSession` to IndexedDB
-- **IndexedDB schema:**
-  - Store: `scenarios`
-  - Key: `session.id`
-  - Value: full `ScenarioSession` object
-- **Load:** On app mount, check for an active session and hydrate state
-- **End session:** Remove from IndexedDB (or mark as completed)
+- **Backend:** Thin Express server running alongside Vite dev server
+- **Storage format:** One JSON file per scenario session at `game-data/scenarios/{id}.json`
+- **Auto-save:** After every reducer dispatch, `PUT /api/scenarios/:id` writes the full `ScenarioSession` to disk
+- **Load:** On app mount, `GET /api/scenarios` lists saved sessions; `GET /api/scenarios/:id` hydrates state
+- **End session:** `DELETE /api/scenarios/:id` removes the file from disk
+- **API routes:**
+
+```
+GET    /api/scenarios          # List all saved sessions (id, name, updatedAt)
+GET    /api/scenarios/:id      # Load a full session
+PUT    /api/scenarios/:id      # Create or update a session (upsert)
+DELETE /api/scenarios/:id      # Delete a session
+```
+
+- **File format:** Pretty-printed JSON for easy inspection and diffing
+- **`game-data/`** is gitignored by default but can be committed if the user wants version history
 
 ---
 
@@ -215,6 +225,6 @@ type ScenarioAction =
 - [ ] Monster standees track individual HP and conditions
 - [ ] Standees can be killed (marked dead, removed from active view)
 - [ ] New standees/groups can be added mid-scenario
-- [ ] State survives page reload (IndexedDB persistence)
+- [ ] State survives page reload (loaded from JSON file on disk)
 - [ ] Can end/discard a session
 - [ ] Visual indicators for exhausted characters and dead monsters
