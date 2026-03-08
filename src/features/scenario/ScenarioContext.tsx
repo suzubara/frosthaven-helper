@@ -2,6 +2,7 @@ import {
   createContext,
   useContext,
   useEffect,
+  useMemo,
   useReducer,
   useRef,
   useState,
@@ -18,7 +19,6 @@ import { deleteSession, listSessions, saveSession } from '@/api/scenarios'
 interface ScenarioContextValue {
   session: ScenarioSession | null
   dispatch: React.Dispatch<ScenarioAction>
-  isLoading: boolean
 }
 
 const ScenarioContext = createContext<ScenarioContextValue | null>(null)
@@ -26,6 +26,7 @@ const ScenarioContext = createContext<ScenarioContextValue | null>(null)
 export function ScenarioProvider({ children }: { children: ReactNode }) {
   const [session, dispatch] = useReducer(scenarioReducer, initialState)
   const [isLoading, setIsLoading] = useState(true)
+  const savedSessionRef = useRef<ScenarioSession | null>(null)
   const prevSessionIdRef = useRef<string | null>(null)
 
   useEffect(() => {
@@ -40,6 +41,7 @@ export function ScenarioProvider({ children }: { children: ReactNode }) {
           const latest = sessions.reduce((a, b) =>
             a.updatedAt > b.updatedAt ? a : b,
           )
+          savedSessionRef.current = latest
           dispatch({ type: 'LOAD_SESSION', session: latest })
         }
       } finally {
@@ -57,23 +59,38 @@ export function ScenarioProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
-    if (isLoading) return
-
     const prevId = prevSessionIdRef.current
     prevSessionIdRef.current = session?.id ?? null
 
     if (session === null) {
-      if (prevId) {
+      if (prevId && savedSessionRef.current !== session) {
         void deleteSession(prevId)
+        savedSessionRef.current = null
       }
       return
     }
 
+    if (session === savedSessionRef.current) return
+
+    savedSessionRef.current = session
     void saveSession({ ...session, updatedAt: Date.now() })
-  }, [session, isLoading])
+  }, [session])
+
+  const value = useMemo(
+    () => ({ session, dispatch }),
+    [session, dispatch],
+  )
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-muted-foreground">Loading…</p>
+      </div>
+    )
+  }
 
   return (
-    <ScenarioContext value={{ session, dispatch, isLoading }}>
+    <ScenarioContext value={value}>
       {children}
     </ScenarioContext>
   )

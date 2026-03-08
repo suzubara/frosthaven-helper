@@ -17,6 +17,9 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': 'http://localhost:3001'
+    },
+    watch: {
+      ignored: ['**/game-data/**']
     }
   },
   resolve: {
@@ -28,26 +31,36 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
-    projects: [{
-      extends: true,
-      plugins: [
-      // The plugin will run tests for the stories defined in your Storybook config
-      // See options at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon#storybooktest
-      storybookTest({
-        configDir: path.join(dirname, '.storybook')
-      })],
-      test: {
-        name: 'storybook',
-        browser: {
-          enabled: true,
-          headless: true,
-          provider: playwright({}),
-          instances: [{
-            browser: 'chromium'
-          }]
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: 'unit',
+          include: ['src/**/*.test.{ts,tsx}'],
         },
-        setupFiles: ['.storybook/vitest.setup.ts']
-      }
-    }]
+      },
+      {
+        extends: true,
+        plugins: [
+          // The plugin will run tests for the stories defined in your Storybook config
+          // See options at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon#storybooktest
+          storybookTest({
+            configDir: path.join(dirname, '.storybook')
+          }),
+        ],
+        test: {
+          name: 'storybook',
+          browser: {
+            enabled: true,
+            headless: true,
+            provider: playwright({}),
+            instances: [{
+              browser: 'chromium'
+            }],
+          },
+          setupFiles: ['.storybook/vitest.setup.ts'],
+        },
+      },
+    ]
   }
 });
