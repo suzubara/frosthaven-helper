@@ -393,77 +393,80 @@ These are calculated from stored state and displayed in the UI:
 
 ## Acceptance Criteria
 
-- [ ] Can create a new campaign with a name
-- [ ] Can load an existing campaign from a list
-- [ ] Can delete a campaign
-- [ ] Campaign calendar displays 80 boxes organized by season/year
-- [ ] Can mark/unmark weeks on the calendar
-- [ ] Current season and year are displayed correctly
-- [ ] Can add section numbers to calendar boxes
-- [ ] All 9 resource types can be incremented/decremented (min 0)
-- [ ] Morale increments/decrements, clamped 0–20
-- [ ] Morale defense modifier displays correctly
-- [ ] Prosperity checkmarks can be added/removed
-- [ ] Prosperity level and max character level display correctly
-- [ ] Defense value can be adjusted (including negative)
-- [ ] Soldiers can be adjusted, clamped to 0–barracks max
-- [ ] Inspiration can be adjusted (min 0)
-- [ ] Buildings can be added, upgraded, wrecked, and rebuilt
-- [ ] Characters can be added to the party roster (name, class, level, max HP)
-- [ ] Characters can be edited and retired
-- [ ] "Start Scenario with Party" preloads active roster characters into scenario setup
-- [ ] Ad-hoc characters can still be added during scenario setup alongside roster characters
-- [ ] Campaign stickers can be added/removed
-- [ ] Free-form notes can be edited
-- [ ] Retirement records can be added
-- [ ] State persists via localStorage (auto-save on every dispatch)
-- [ ] Scenario tracker migrated from Express API to localStorage
-- [ ] Export all game data as a downloadable JSON file
-- [ ] Import game data from a JSON file (with confirmation UI)
-- [ ] Express server and `src/api/` removed
-- [ ] App deployable as a static site (Netlify)
-- [ ] React Router routing works for `/`, `/campaign/:id`, `/scenario/:id`
-- [ ] State survives page reload
+- [x] Can create a new campaign with a name
+- [x] Can load an existing campaign from a list
+- [x] Can delete a campaign
+- [x] Campaign calendar displays 80 boxes organized by season/year
+- [x] Can mark/unmark weeks on the calendar
+- [x] Current season and year are displayed correctly
+- [x] Can add section numbers to calendar boxes
+- [x] All 9 resource types can be incremented/decremented (min 0)
+- [x] Morale increments/decrements, clamped 0–20
+- [x] Morale defense modifier displays correctly
+- [x] Prosperity checkmarks can be added/removed
+- [x] Prosperity level and max character level display correctly
+- [x] Defense value can be adjusted (including negative)
+- [x] Soldiers can be adjusted, clamped to 0–barracks max
+- [x] Inspiration can be adjusted (min 0)
+- [x] Buildings can be added, upgraded, wrecked, and rebuilt
+- [x] Characters can be added to the party roster (name, class, level, max HP)
+- [x] Characters can be edited and retired
+- [x] "Start Scenario with Party" preloads active roster characters into scenario setup
+- [x] Ad-hoc characters can still be added during scenario setup alongside roster characters
+- [x] Campaign stickers can be added/removed
+- [x] Free-form notes can be edited
+- [x] ~~Retirement records can be added~~ _(moved to Slice 4 — Character Progression; reducer action exists)_
+- [x] State persists via localStorage (auto-save on every dispatch)
+- [x] Scenario tracker migrated from Express API to localStorage
+- [x] Export all game data as a downloadable JSON file
+- [x] Import game data from a JSON file (with confirmation UI)
+- [x] Express server and `src/api/` removed
+- [x] ~~App deployable as a static site~~ _(moved to standalone task — GitHub Pages deployment)_
+- [x] React Router routing works for `/`, `/campaign/:id`, `/scenario/:id`
+- [x] State survives page reload
 
 ---
 
 ## Implementation Plan
 
-### Phase 1: Routing & Storage Migration
+### Phase 1: Routing & Storage Migration ✅
 
-1. **Migrate scenario persistence to localStorage** — create `src/storage/scenarios.ts`, update `ScenarioContext.tsx`
-2. **Create `src/storage/campaigns.ts`** — localStorage CRUD for campaigns
-3. **Create `src/storage/export.ts`** — JSON import/export helpers
-4. **Remove Express server** — delete `server/index.ts`, `src/api/`, related deps (`express`, `concurrently`, `tsx`), and update `package.json` scripts
-5. **Add React Router** to `main.tsx` with route definitions
-6. **Refactor `App.tsx`** — move scenario flow to `/scenario` routes
-7. **Create home/landing page** at `/` with links to campaigns and scenarios
-8. **Add campaign types** at `src/types/campaign.ts`
+1. ✅ **Migrate scenario persistence to localStorage** — `src/storage/scenarios.ts`, `ScenarioContext.tsx` updated
+2. ✅ **Create `src/storage/campaigns.ts`** — localStorage CRUD for campaigns
+3. ✅ **Create `src/storage/export.ts`** — JSON import/export helpers
+4. ✅ **Remove Express server** — `server/`, `src/api/` deleted, deps removed, `dev` script runs `vite` only
+5. ✅ **Add React Router** to `main.tsx` with route definitions
+6. ✅ **Refactor `App.tsx`** — layout shell with `<Outlet>`, nav bar
+7. ✅ **Create home/landing page** at `/` with links to campaigns and scenarios
+8. ✅ **Add campaign types** at `src/types/campaign.ts`
 
-### Phase 2: Campaign State & Core Reducer
+### Phase 2: Campaign State & Core Reducer ✅
 
-9. **Create `campaignReducer.ts`** with all actions
-10. **Write reducer tests** (`campaignReducer.test.ts`) — full coverage
-11. **Create `CampaignContext.tsx`** with auto-save/load (same pattern as ScenarioContext)
+9. ✅ **Create `campaignReducer.ts`** with all actions
+10. ✅ **Write reducer tests** (`campaignReducer.test.ts`) — full coverage
+11. ✅ **Create `CampaignContext.tsx`** with auto-save/load
 
-### Phase 3: Campaign UI
+### Phase 3: Campaign UI ✅
 
-12. **Campaign list page** — create/load/delete campaigns
-13. **Campaign tracker layout** — main page with sections for each tracked area
-14. **Resource tracking** — material + herb counters
-15. **Morale tracking** — counter with defense modifier display
-16. **Prosperity tracking** — checkmark progress bar with level indicator
-17. **Defense/Soldiers/Inspiration** — simple counters
-18. **Campaign calendar** — grid of boxes with season/year labels
-19. **Buildings list** — add/upgrade/wreck/rebuild
-20. **Party roster** — add/edit/retire characters
-21. **Notes & stickers** — text inputs
+12. ✅ **Campaign list page** — create/load/delete campaigns
+13. ✅ **Campaign tracker layout** — `CampaignPage.tsx` with all sections
+14. ✅ **Resource tracking** — `ResourceTracker.tsx` (materials + herbs)
+15. ✅ **Morale tracking** — `OutpostStats.tsx` (counter with defense modifier)
+16. ✅ **Prosperity tracking** — `OutpostStats.tsx` (checkmarks, level, max char level)
+17. ✅ **Defense/Soldiers/Inspiration** — `OutpostStats.tsx`
+18. ✅ **Campaign calendar** — `CampaignCalendar.tsx` (grid with season/year labels, section management)
+19. ✅ **Buildings list** — `BuildingList.tsx` (add/upgrade/wreck/rebuild)
+20. ✅ **Party roster** — `PartyRoster.tsx` (add/edit/retire)
+21. ✅ **Notes & stickers** — `CampaignNotes.tsx`
 
-### Phase 4: Scenario Integration & Polish
+### Phase 4: Scenario Integration & Polish ✅
 
-22. **"Start Scenario with Party"** — button on campaign page that navigates to scenario setup with roster characters preloaded
-23. **Scenario setup refactor** — accept optional preloaded characters, allow adding/removing before starting
-24. **Import/export UI** — buttons on home page for backup/restore
-25. **Navigation** — header/nav bar for moving between campaign ↔ scenario
-26. **Derived value display** — effective defense, max character level, etc.
-27. **Netlify deployment** — add `netlify.toml`, configure build, deploy
+22. ✅ **"Start Scenario with Party"** — button on `CampaignPage.tsx` navigates to `/scenario?campaignId=...`
+23. ✅ **Scenario setup refactor** — `ScenarioSetup.tsx` accepts `preloadedCharacters`, allows adding/removing
+24. ✅ **Import/export UI** — buttons on `HomePage.tsx` with confirmation
+25. ✅ **Navigation** — header nav bar in `App.tsx`
+26. ✅ **Derived value display** — effective defense, max character level in `OutpostStats.tsx`
+
+_Moved out of scope:_
+- **GitHub Pages deployment** → standalone task
+- **Retirement record UI** → Slice 4 (Character Progression)

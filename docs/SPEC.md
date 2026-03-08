@@ -26,10 +26,10 @@ A local web app to help track game state while playing the board game **Frosthav
 | Language | TypeScript (strict) | ✅ |
 | Framework | React 19 | ✅ |
 | Build | Vite 7 | ✅ |
-| Routing | React Router 7 | ✅ installed, not yet used for page routing |
+| Routing | React Router 7 | ✅ page routing active (`/`, `/scenario`, `/campaigns`, `/campaign/:id`) |
 | Testing | Vitest + Testing Library | ✅ |
-| Persistence | localStorage (browser) + JSON import/export | 🔄 migrating from Express API |
-| Deployment | Static site (Netlify) | planned |
+| Persistence | localStorage (browser) + JSON import/export | ✅ migrated from Express API |
+| Deployment | Static site (GitHub Pages) | 🔄 planned |
 | State management | React Context + `useReducer` | ✅ |
 | UI | Tailwind CSS 4 + shadcn/ui components | ✅ |
 | Package manager | pnpm | ✅ |
@@ -38,12 +38,10 @@ A local web app to help track game state while playing the board game **Frosthav
 
 ```
 src/
-├── api/                  # ✅ Client-side API helpers (fetch wrappers)
-│   └── scenarios.ts      # ✅ ⚠️ To be replaced by src/storage/ in Slice 3
-├── storage/              # Persistence layer (localStorage wrappers) — planned for Slice 3
-│   └── scenarios.ts      # planned (replaces src/api/scenarios.ts)
-│   └── campaigns.ts      # planned
-│   └── export.ts         # planned (JSON import/export helpers)
+├── storage/              # ✅ Persistence layer (localStorage wrappers)
+│   ├── scenarios.ts      # ✅ (replaced src/api/scenarios.ts)
+│   ├── campaigns.ts      # ✅
+│   └── export.ts         # ✅ (JSON import/export helpers)
 ├── components/ui/        # Shared UI components (shadcn/ui)
 │   ├── badge.tsx          # ✅
 │   ├── button.tsx         # ✅
@@ -55,18 +53,17 @@ src/
 │   ├── conditions.ts      # ✅
 │   └── elements.ts        # ✅
 ├── features/
-│   ├── scenario/         # Scenario tracker (in-game phase) ✅
-│   ├── campaign/         # Campaign & outpost phase tracking (planned)
-│   └── characters/       # Character creation & progression (planned)
+│   ├── scenario/         # ✅ Scenario tracker (in-game phase)
+│   ├── campaign/         # ✅ Campaign & outpost phase tracking
+│   ├── home/             # ✅ Home/landing page
+│   └── characters/       # Character creation & progression (planned — Slice 4)
 ├── lib/
 │   └── utils.ts          # ✅ cn() helper
 ├── types/
-│   └── scenario.ts       # ✅
-├── App.tsx               # ✅ Root component (setup ↔ tracker flow)
-└── main.tsx              # ✅ Entry point
-
-server/                   # ⚠️ To be removed (replaced by localStorage)
-└── index.ts              # Express API (was used for dev, being phased out)
+│   ├── scenario.ts       # ✅
+│   └── campaign.ts       # ✅
+├── App.tsx               # ✅ Layout shell with nav + <Outlet>
+└── main.tsx              # ✅ Entry point with React Router
 ```
 
 ## Data Model Summary
@@ -115,30 +112,44 @@ See [docs/features/scenario-tracker.md](./features/scenario-tracker.md) for deta
 - Character HP/XP tracking with condition toggles
 - Monster group tracking with per-standee HP, conditions, kill/spawn
 - Element board (6 elements, click to toggle Strong/Inert, auto-decay on round advance)
-- Express API with JSON file persistence (`game-data/scenarios/`) ⚠️ being replaced by localStorage in Slice 3
+- localStorage persistence (migrated from Express API) ✅
 - Auto-save on every state change, auto-load latest session on mount
 - Reducer with full test coverage (`scenarioReducer.test.ts`)
 - UI built with Tailwind CSS + shadcn/ui components
+- React Router page routing at `/scenario` ✅
+- Accepts preloaded characters from campaign roster via `?campaignId=` query param ✅
 
 **Not yet implemented from spec:**
-- React Router page routing (currently single-page conditional render)
 - Resume/select from multiple saved sessions (auto-loads latest only)
 
-### Slice 2: Initiative & Turn Order (planned)
+### Slice 2: Initiative & Turn Order (next up)
 
-- Initiative value entry per character + monster group
-- Sorted turn order display
-- Current turn indicator with next/previous controls
+See [docs/features/initiative-turn-order.md](./features/initiative-turn-order.md) for detailed spec and acceptance criteria.
+
+- Initiative value entry (1–99) per character + monster group
 - Long rest auto-sets initiative to 99
+- Sorted turn order display with current turn highlighting
+- Next/previous turn controls
+- Round advance resets all initiative and turn state
 
-### Slice 3: Campaign & Outpost Tracking (planned)
+### Slice 3: Campaign & Outpost Tracking ✅
 
-- Create/load campaign
-- Campaign calendar with season tracking
-- Resource management (Frosthaven supply)
-- Morale, prosperity, defense, soldiers, inspiration tracking
-- Scenario unlock/completion map
-- Building management
+See [docs/features/campaign-tracker.md](./features/campaign-tracker.md) for detailed spec and acceptance criteria.
+
+**Implemented:**
+- Create/load/delete campaigns with localStorage persistence
+- Campaign calendar (80 boxes, season/year tracking, section numbers)
+- Resource management (3 materials + 6 herbs)
+- Morale (0–20) with defense modifier display
+- Prosperity checkmarks with level + max starting character level
+- Defense, soldiers, inspiration counters
+- Building management (add/upgrade/wreck/rebuild)
+- Party roster (add/edit/retire characters)
+- Campaign notes & stickers
+- Full reducer with test coverage (`campaignReducer.test.ts`)
+- "Start Scenario with Party" integration
+- Import/export game data (JSON backup/restore)
+- Storybook stories for all campaign components
 
 ### Slice 4: Character Progression (planned)
 
@@ -146,10 +157,16 @@ See [docs/features/scenario-tracker.md](./features/scenario-tracker.md) for deta
 - Level up flow (XP thresholds)
 - Perk/checkmark tracking
 - Item management
-- Retirement flow
+- Retirement flow with retirement records (ADD_RETIREMENT reducer action exists, needs UI)
 
 ### Slice 5: Reference Data (planned)
 
 - Starter class stat cards (Banner Spear, Drifter, Boneshaper, Deathwalker, Blinkblade, Geminate)
 - Monster stat lookup by type + level
 - Condition reference with rules summary
+
+### Future Enhancements (backlog)
+
+- **Character allies in scenarios** — support tracking allies alongside characters (HP, conditions) during a scenario
+- **Data timestamps** — show when game data was last saved; show source file timestamp when importing from a backup
+- **Autocomplete inputs** — combobox UI component for fields with known values (e.g. class names, monster types, building names) using suggested/existing values
