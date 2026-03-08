@@ -8,13 +8,13 @@ A local web app to help track game state while playing the board game **Frosthav
 
 - **Scenario phase tracking** — round counter, HP, conditions, elements, initiative for all figures
 - **Campaign/outpost tracking** — calendar, resources, morale, prosperity, buildings, character progression
-- **Local-first** — runs locally with a thin Express API; game state persists as JSON files on disk
+- **Local-first** — runs in-browser with localStorage persistence; deployable as a static site
 - **Multi-session** — save and resume campaigns and in-progress scenarios across play sessions
+- **Portable** — import/export game state as JSON files for manual backup and cross-device transfer
 
 ## Non-Goals (for now)
 
-- Cloud sync or multi-device support
-- Deployment to a hosted environment
+- Cloud sync or automatic multi-device support
 - Mobile-native app (responsive web is fine)
 - Digital recreation of game rules/enforcement (this is a tracker, not a rules engine)
 - Undo/redo system
@@ -28,8 +28,8 @@ A local web app to help track game state while playing the board game **Frosthav
 | Build | Vite 7 | ✅ |
 | Routing | React Router 7 | ✅ installed, not yet used for page routing |
 | Testing | Vitest + Testing Library | ✅ |
-| Persistence | JSON files on disk via Express API | ✅ |
-| Backend | Express 5 (lightweight local API server) | ✅ |
+| Persistence | localStorage (browser) + JSON import/export | 🔄 migrating from Express API |
+| Deployment | Static site (Netlify) | planned |
 | State management | React Context + `useReducer` | ✅ |
 | UI | Tailwind CSS 4 + shadcn/ui components | ✅ |
 | Package manager | pnpm | ✅ |
@@ -38,8 +38,12 @@ A local web app to help track game state while playing the board game **Frosthav
 
 ```
 src/
-├── api/                  # Client-side API helpers (fetch wrappers)
-│   └── scenarios.ts      # ✅
+├── api/                  # ✅ Client-side API helpers (fetch wrappers)
+│   └── scenarios.ts      # ✅ ⚠️ To be replaced by src/storage/ in Slice 3
+├── storage/              # Persistence layer (localStorage wrappers) — planned for Slice 3
+│   └── scenarios.ts      # planned (replaces src/api/scenarios.ts)
+│   └── campaigns.ts      # planned
+│   └── export.ts         # planned (JSON import/export helpers)
 ├── components/ui/        # Shared UI components (shadcn/ui)
 │   ├── badge.tsx          # ✅
 │   ├── button.tsx         # ✅
@@ -61,12 +65,8 @@ src/
 ├── App.tsx               # ✅ Root component (setup ↔ tracker flow)
 └── main.tsx              # ✅ Entry point
 
-server/
-└── index.ts              # ✅ Express API (scenarios CRUD + file persistence)
-
-game-data/                # Persisted game state (JSON files, gitignored)
-└── scenarios/
-    └── {session-id}.json
+server/                   # ⚠️ To be removed (replaced by localStorage)
+└── index.ts              # Express API (was used for dev, being phased out)
 ```
 
 ## Data Model Summary
@@ -115,7 +115,7 @@ See [docs/features/scenario-tracker.md](./features/scenario-tracker.md) for deta
 - Character HP/XP tracking with condition toggles
 - Monster group tracking with per-standee HP, conditions, kill/spawn
 - Element board (6 elements, click to toggle Strong/Inert, auto-decay on round advance)
-- Express API with JSON file persistence (`game-data/scenarios/`)
+- Express API with JSON file persistence (`game-data/scenarios/`) ⚠️ being replaced by localStorage in Slice 3
 - Auto-save on every state change, auto-load latest session on mount
 - Reducer with full test coverage (`scenarioReducer.test.ts`)
 - UI built with Tailwind CSS + shadcn/ui components
