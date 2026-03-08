@@ -193,22 +193,29 @@ type ScenarioAction =
 
 ## Persistence Strategy
 
-- **Backend:** Thin Express server running alongside Vite dev server
+### Currently implemented (Slice 1)
+
+- **Backend:** Express 5 server running alongside Vite dev server
 - **Storage format:** One JSON file per scenario session at `game-data/scenarios/{id}.json`
 - **Auto-save:** After every reducer dispatch, `PUT /api/scenarios/:id` writes the full `ScenarioSession` to disk
 - **Load:** On app mount, `GET /api/scenarios` lists saved sessions; `GET /api/scenarios/:id` hydrates state
 - **End session:** `DELETE /api/scenarios/:id` removes the file from disk
-- **API routes:**
+- **Files involved:** `src/api/scenarios.ts`, `server/index.ts`, `src/features/scenario/ScenarioContext.tsx`
 
-```
-GET    /api/scenarios          # List all saved sessions (id, name, updatedAt)
-GET    /api/scenarios/:id      # Load a full session
-PUT    /api/scenarios/:id      # Create or update a session (upsert)
-DELETE /api/scenarios/:id      # Delete a session
-```
+### Changing in Slice 3
 
-- **File format:** Pretty-printed JSON for easy inspection and diffing
-- **`game-data/`** is gitignored by default but can be committed if the user wants version history
+The persistence layer is moving from Express API → **localStorage** so the app can deploy as a static site. See [campaign-tracker.md](./campaign-tracker.md) for full details.
+
+**What changes:**
+- `src/api/scenarios.ts` → replaced by `src/storage/scenarios.ts` (same interface, localStorage backend)
+- `ScenarioContext.tsx` → update imports to use new storage module
+- `server/index.ts` → removed entirely
+- `game-data/` directory → no longer used (existing files can be imported via import/export feature)
+
+**What stays the same:**
+- Auto-save after every reducer dispatch
+- Same CRUD interface (save, load, list, delete)
+- Same data shape (`ScenarioSession` type unchanged)
 
 ---
 

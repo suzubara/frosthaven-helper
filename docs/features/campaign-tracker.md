@@ -313,26 +313,65 @@ The current `App.tsx` conditional render approach will be replaced with proper r
 
 ## Persistence Strategy
 
-Same pattern as scenario tracker — new API routes and file storage:
+All data persists in **localStorage** — no backend required. The app deploys as a static site (Netlify).
+
+### Storage Keys
 
 ```
-game-data/
-├── scenarios/
-│   └── {session-id}.json
-└── campaigns/
-    └── {campaign-id}.json
+fh:campaigns              # JSON array of Campaign objects
+fh:scenarios              # JSON array of ScenarioSession objects (existing, migrated from Express API)
 ```
 
-**API routes:**
+### Storage Layer (`src/storage/campaigns.ts`)
 
-```
-GET    /api/campaigns          # List all saved campaigns
-GET    /api/campaigns/:id      # Load a full campaign
-PUT    /api/campaigns/:id      # Create or update a campaign (upsert)
-DELETE /api/campaigns/:id      # Delete a campaign
+```typescript
+// Same interface pattern as the existing scenario storage
+function saveCampaign(campaign: Campaign): void      // write to localStorage
+function loadCampaign(id: string): Campaign | null   // read by id
+function listCampaigns(): Campaign[]                 // list all
+function deleteCampaign(id: string): void            // remove by id
 ```
 
-**Auto-save:** After every reducer dispatch, `PUT /api/campaigns/:id` writes the full `Campaign` to disk (same pattern as scenario tracker).
+**Auto-save:** After every reducer dispatch, `saveCampaign()` writes the full `Campaign` to localStorage (same pattern as scenario tracker, but synchronous — no network calls).
+
+### Import/Export (`src/storage/export.ts`)
+
+For manual backup and cross-device transfer:
+
+```typescript
+// Export all game data as a single JSON file download
+function exportGameData(): void
+// triggers browser file download of { campaigns: [...], scenarios: [...] }
+
+// Import game data from a JSON file (merge or replace)
+function importGameData(file: File): Promise<{ campaigns: number; scenarios: number }>
+// returns count of imported records
+```
+
+- Export produces a `.json` file named `frosthaven-backup-{date}.json`
+- Import reads a file via `<input type="file">` and writes to localStorage
+- Import UI should show a confirmation with counts before committing
+- Import strategy: **replace** (clear + write) with a warning, not merge
+
+### Migration from Express API
+
+The existing scenario tracker (Slice 1) currently persists via Express API + JSON files on disk. This needs to change so the app can deploy as a static site.
+
+**Existing files to change:**
+| File | Action |
+|---|---|
+| `src/api/scenarios.ts` | **Delete** — replaced by `src/storage/scenarios.ts` |
+| `src/features/scenario/ScenarioContext.tsx` | **Edit** — update imports from `src/api/` → `src/storage/` |
+| `server/index.ts` | **Delete** — Express server no longer needed |
+| `game-data/` | **Delete** — no longer used; existing data can be imported via the import feature |
+| `package.json` | **Edit** — remove `express`, `@types/express`, `concurrently`, `tsx` deps; update `dev` script to just run `vite` |
+
+**New files to create:**
+| File | Purpose |
+|---|---|
+| `src/storage/scenarios.ts` | localStorage CRUD (same interface as old `src/api/scenarios.ts`) |
+| `src/storage/campaigns.ts` | localStorage CRUD for campaigns |
+| `src/storage/export.ts` | JSON import/export helpers |
 
 ---
 
@@ -377,7 +416,12 @@ These are calculated from stored state and displayed in the UI:
 - [ ] Campaign stickers can be added/removed
 - [ ] Free-form notes can be edited
 - [ ] Retirement records can be added
-- [ ] State persists via JSON file on disk (same auto-save pattern)
+- [ ] State persists via localStorage (auto-save on every dispatch)
+- [ ] Scenario tracker migrated from Express API to localStorage
+- [ ] Export all game data as a downloadable JSON file
+- [ ] Import game data from a JSON file (with confirmation UI)
+- [ ] Express server and `src/api/` removed
+- [ ] App deployable as a static site (Netlify)
 - [ ] React Router routing works for `/`, `/campaign/:id`, `/scenario/:id`
 - [ ] State survives page reload
 
@@ -385,37 +429,41 @@ These are calculated from stored state and displayed in the UI:
 
 ## Implementation Plan
 
-### Phase 1: Routing & Infrastructure
+### Phase 1: Routing & Storage Migration
 
-1. **Add React Router** to `main.tsx` with route definitions
-2. **Refactor `App.tsx`** — move scenario flow to `/scenario` routes
-3. **Create home/landing page** at `/` with links to campaigns and scenarios
-4. **Add campaign API routes** to `server/index.ts` (CRUD for `game-data/campaigns/`)
-5. **Add campaign API client** at `src/api/campaigns.ts`
-6. **Add campaign types** at `src/types/campaign.ts`
+1. **Migrate scenario persistence to localStorage** — create `src/storage/scenarios.ts`, update `ScenarioContext.tsx`
+2. **Create `src/storage/campaigns.ts`** — localStorage CRUD for campaigns
+3. **Create `src/storage/export.ts`** — JSON import/export helpers
+4. **Remove Express server** — delete `server/index.ts`, `src/api/`, related deps (`express`, `concurrently`, `tsx`), and update `package.json` scripts
+5. **Add React Router** to `main.tsx` with route definitions
+6. **Refactor `App.tsx`** — move scenario flow to `/scenario` routes
+7. **Create home/landing page** at `/` with links to campaigns and scenarios
+8. **Add campaign types** at `src/types/campaign.ts`
 
 ### Phase 2: Campaign State & Core Reducer
 
-7. **Create `campaignReducer.ts`** with all actions
-8. **Write reducer tests** (`campaignReducer.test.ts`) — full coverage
-9. **Create `CampaignContext.tsx`** with auto-save/load (same pattern as ScenarioContext)
+9. **Create `campaignReducer.ts`** with all actions
+10. **Write reducer tests** (`campaignReducer.test.ts`) — full coverage
+11. **Create `CampaignContext.tsx`** with auto-save/load (same pattern as ScenarioContext)
 
 ### Phase 3: Campaign UI
 
-10. **Campaign list page** — create/load/delete campaigns
-11. **Campaign tracker layout** — main page with sections for each tracked area
-12. **Resource tracking** — material + herb counters
-13. **Morale tracking** — counter with defense modifier display
-14. **Prosperity tracking** — checkmark progress bar with level indicator
-15. **Defense/Soldiers/Inspiration** — simple counters
-16. **Campaign calendar** — grid of boxes with season/year labels
-17. **Buildings list** — add/upgrade/wreck/rebuild
-18. **Party roster** — add/edit/retire characters
-19. **Notes & stickers** — text inputs
+12. **Campaign list page** — create/load/delete campaigns
+13. **Campaign tracker layout** — main page with sections for each tracked area
+14. **Resource tracking** — material + herb counters
+15. **Morale tracking** — counter with defense modifier display
+16. **Prosperity tracking** — checkmark progress bar with level indicator
+17. **Defense/Soldiers/Inspiration** — simple counters
+18. **Campaign calendar** — grid of boxes with season/year labels
+19. **Buildings list** — add/upgrade/wreck/rebuild
+20. **Party roster** — add/edit/retire characters
+21. **Notes & stickers** — text inputs
 
 ### Phase 4: Scenario Integration & Polish
 
-20. **"Start Scenario with Party"** — button on campaign page that navigates to scenario setup with roster characters preloaded
-21. **Scenario setup refactor** — accept optional preloaded characters, allow adding/removing before starting
-22. **Navigation** — header/nav bar for moving between campaign ↔ scenario
-23. **Derived value display** — effective defense, max character level, etc.
+22. **"Start Scenario with Party"** — button on campaign page that navigates to scenario setup with roster characters preloaded
+23. **Scenario setup refactor** — accept optional preloaded characters, allow adding/removing before starting
+24. **Import/export UI** — buttons on home page for backup/restore
+25. **Navigation** — header/nav bar for moving between campaign ↔ scenario
+26. **Derived value display** — effective defense, max character level, etc.
+27. **Netlify deployment** — add `netlify.toml`, configure build, deploy
