@@ -13,17 +13,19 @@ import type { MonsterGroup, MonsterStandee } from '@/types/scenario'
 export function ScenarioTracker() {
   const { session, dispatch } = useScenario()
 
-  if (!session) return null
-
   const turnOrder = useMemo(
     () =>
-      getSortedTurnOrder(
-        session.characters,
-        session.monsterGroups,
-        session.currentTurnIndex,
-      ),
-    [session.characters, session.monsterGroups, session.currentTurnIndex],
+      session
+        ? getSortedTurnOrder(
+            session.characters,
+            session.monsterGroups,
+            session.currentTurnIndex,
+          )
+        : [],
+    [session],
   )
+
+  if (!session) return null
 
   function handleAddMonsterGroup() {
     const group: MonsterGroup = {
