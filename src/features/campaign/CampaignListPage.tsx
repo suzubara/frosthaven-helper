@@ -1,7 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import type { Campaign } from '@/types/campaign'
-import { deleteCampaign, listCampaigns } from '@/api/campaigns'
+import {
+  deleteCampaign,
+  listCampaigns,
+  saveCampaign,
+} from '@/storage/campaigns'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
@@ -38,45 +42,25 @@ function createNewCampaign(name: string): Campaign {
 }
 
 export default function CampaignListPage() {
-  const [campaigns, setCampaigns] = useState<Campaign[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [campaigns, setCampaigns] = useState<Campaign[]>(() => listCampaigns())
   const [newName, setNewName] = useState('')
   const navigate = useNavigate()
 
-  useEffect(() => {
-    listCampaigns()
-      .then(setCampaigns)
-      .finally(() => setIsLoading(false))
-  }, [])
-
-  async function handleCreate(e: React.FormEvent) {
+  function handleCreate(e: React.FormEvent) {
     e.preventDefault()
     const trimmed = newName.trim()
     if (!trimmed) return
 
     const campaign = createNewCampaign(trimmed)
-
-    await fetch(`/api/campaigns/${campaign.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(campaign),
-    })
+    saveCampaign(campaign)
 
     setNewName('')
     navigate(`/campaign/${campaign.id}`)
   }
 
-  async function handleDelete(id: string) {
-    await deleteCampaign(id)
+  function handleDelete(id: string) {
+    deleteCampaign(id)
     setCampaigns((prev) => prev.filter((c) => c.id !== id))
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground">Loading campaigns…</p>
-      </div>
-    )
   }
 
   return (

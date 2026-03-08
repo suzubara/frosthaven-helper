@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import type { MonsterRank, ScenarioSession } from '@/types/scenario'
+import type { PartyCharacter } from '@/types/campaign'
 import { createDefaultElements } from '@/data/elements'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -24,14 +26,22 @@ interface MonsterGroupEntry {
 }
 
 interface ScenarioSetupProps {
+  preloadedCharacters?: PartyCharacter[]
   onStart: (session: ScenarioSession) => void
 }
 
-export function ScenarioSetup({ onStart }: ScenarioSetupProps) {
+export function ScenarioSetup({
+  preloadedCharacters,
+  onStart,
+}: ScenarioSetupProps) {
   const [scenarioName, setScenarioName] = useState('')
-  const [characters, setCharacters] = useState<CharacterEntry[]>([
-    { name: '', maxHp: 0 },
-  ])
+
+  const initialCharacters: CharacterEntry[] = preloadedCharacters?.length
+    ? preloadedCharacters.map((c) => ({ name: c.name, maxHp: c.maxHp }))
+    : [{ name: '', maxHp: 0 }]
+
+  const [characters, setCharacters] =
+    useState<CharacterEntry[]>(initialCharacters)
   const [monsterGroups, setMonsterGroups] = useState<MonsterGroupEntry[]>([])
 
   function addCharacter() {
@@ -182,7 +192,12 @@ export function ScenarioSetup({ onStart }: ScenarioSetupProps) {
       {/* Characters */}
       <Card>
         <CardHeader>
-          <CardTitle>Characters</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            Characters
+            {preloadedCharacters && preloadedCharacters.length > 0 && (
+              <Badge variant="secondary">From campaign roster</Badge>
+            )}
+          </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           {characters.map((char, i) => (

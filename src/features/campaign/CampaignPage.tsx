@@ -1,4 +1,4 @@
-import { useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { CampaignProvider, useCampaign } from '@/features/campaign/CampaignContext'
 import { ResourceTracker } from '@/features/campaign/ResourceTracker'
@@ -10,6 +10,9 @@ import { CampaignNotes } from '@/features/campaign/CampaignNotes'
 
 function CampaignContent() {
   const { campaign, dispatch, reloadCampaign } = useCampaign()
+  const navigate = useNavigate()
+
+  const activeParty = campaign?.party.filter((c) => !c.retired) ?? []
 
   if (!campaign) {
     return (
@@ -23,7 +26,7 @@ function CampaignContent() {
     <div className="mx-auto flex max-w-4xl flex-col gap-6 p-4">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">{campaign.name}</h1>
-        <Button variant="outline" size="sm" onClick={() => void reloadCampaign()}>
+        <Button variant="outline" size="sm" onClick={reloadCampaign}>
           Reload
         </Button>
       </div>
@@ -109,6 +112,18 @@ function CampaignContent() {
         }
         onUpdateNotes={(notes) => dispatch({ type: 'UPDATE_NOTES', notes })}
       />
+
+      {activeParty.length > 0 && (
+        <Button
+          size="lg"
+          className="w-full"
+          onClick={() =>
+            navigate(`/scenario?campaignId=${campaign.id}`)
+          }
+        >
+          ▶ Start Scenario with Party
+        </Button>
+      )}
     </div>
   )
 }
