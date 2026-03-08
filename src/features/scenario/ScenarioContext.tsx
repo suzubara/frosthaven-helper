@@ -13,7 +13,7 @@ import {
   scenarioReducer,
   type ScenarioAction,
 } from '@/features/scenario/scenarioReducer'
-import { deleteSession, listSessions, saveSession } from '@/db/scenarioDB'
+import { deleteSession, listSessions, saveSession } from '@/api/scenarios'
 
 interface ScenarioContextValue {
   session: ScenarioSession | null
