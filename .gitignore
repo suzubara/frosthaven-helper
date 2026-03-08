@@ -25,3 +25,4 @@ dist-ssr
 
 # Game session data
 game-data/scenarios/
+storybook-static/
