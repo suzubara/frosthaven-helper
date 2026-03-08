@@ -165,6 +165,11 @@ See [docs/features/campaign-tracker.md](./features/campaign-tracker.md) for deta
 - Monster stat lookup by type + level
 - Condition reference with rules summary
 
+### Production (standalone tasks)
+
+- [ ] **GitHub Pages deployment** — configure Vite base path, add GitHub Actions workflow for build + deploy to `gh-pages`
+- [ ] **Git hooks with Husky** — install Husky + lint-staged; pre-commit hook runs `eslint` and `tsc --noEmit` on staged files
+
 ### Future Enhancements (backlog)
 
 - **Character allies in scenarios** — support tracking allies alongside characters (HP, conditions) during a scenario
