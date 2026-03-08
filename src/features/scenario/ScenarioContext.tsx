@@ -5,7 +5,6 @@ import {
   useMemo,
   useReducer,
   useRef,
-  useState,
   type ReactNode,
 } from 'react'
 import type { ScenarioSession } from '@/types/scenario'
@@ -14,7 +13,7 @@ import {
   scenarioReducer,
   type ScenarioAction,
 } from '@/features/scenario/scenarioReducer'
-import { deleteSession, listSessions, saveSession } from '@/api/scenarios'
+import { deleteSession, listSessions, saveSession } from '@/storage/scenarios'
 
 interface ScenarioContextValue {
   session: ScenarioSession | null
@@ -24,39 +23,17 @@ interface ScenarioContextValue {
 const ScenarioContext = createContext<ScenarioContextValue | null>(null)
 
 export function ScenarioProvider({ children }: { children: ReactNode }) {
-  const [session, dispatch] = useReducer(scenarioReducer, initialState)
-  const [isLoading, setIsLoading] = useState(true)
-  const savedSessionRef = useRef<ScenarioSession | null>(null)
-  const prevSessionIdRef = useRef<string | null>(null)
-
-  useEffect(() => {
-    let cancelled = false
-
-    async function loadLatestSession() {
-      try {
-        const sessions = await listSessions()
-        if (cancelled) return
-
-        if (sessions.length > 0) {
-          const latest = sessions.reduce((a, b) =>
-            a.updatedAt > b.updatedAt ? a : b,
-          )
-          savedSessionRef.current = latest
-          dispatch({ type: 'LOAD_SESSION', session: latest })
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false)
-        }
-      }
+  const [session, dispatch] = useReducer(scenarioReducer, undefined, () => {
+    const sessions = listSessions()
+    if (sessions.length > 0) {
+      return sessions.reduce((a, b) =>
+        a.updatedAt > b.updatedAt ? a : b,
+      )
     }
-
-    void loadLatestSession()
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
+    return initialState
+  })
+  const savedSessionRef = useRef<ScenarioSession | null>(session)
+  const prevSessionIdRef = useRef<string | null>(session?.id ?? null)
 
   useEffect(() => {
     const prevId = prevSessionIdRef.current
@@ -64,7 +41,7 @@ export function ScenarioProvider({ children }: { children: ReactNode }) {
 
     if (session === null) {
       if (prevId && savedSessionRef.current !== session) {
-        void deleteSession(prevId)
+        deleteSession(prevId)
         savedSessionRef.current = null
       }
       return
@@ -73,21 +50,13 @@ export function ScenarioProvider({ children }: { children: ReactNode }) {
     if (session === savedSessionRef.current) return
 
     savedSessionRef.current = session
-    void saveSession({ ...session, updatedAt: Date.now() })
+    saveSession({ ...session, updatedAt: Date.now() })
   }, [session])
 
   const value = useMemo(
     () => ({ session, dispatch }),
     [session, dispatch],
   )
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground">Loading…</p>
-      </div>
-    )
-  }
 
   return (
     <ScenarioContext value={value}>

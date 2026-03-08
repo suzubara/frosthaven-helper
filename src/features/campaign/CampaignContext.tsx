@@ -6,7 +6,6 @@ import {
   useMemo,
   useReducer,
   useRef,
-  useState,
   type ReactNode,
 } from 'react'
 import type { Campaign } from '@/types/campaign'
@@ -15,12 +14,15 @@ import {
   campaignReducer,
   type CampaignAction,
 } from '@/features/campaign/campaignReducer'
-import { loadCampaign, saveCampaign } from '@/api/campaigns'
+import {
+  loadCampaign as loadCampaignFromStorage,
+  saveCampaign,
+} from '@/storage/campaigns'
 
 interface CampaignContextValue {
   campaign: Campaign | null
   dispatch: React.Dispatch<CampaignAction>
-  reloadCampaign: () => Promise<void>
+  reloadCampaign: () => void
 }
 
 const CampaignContext = createContext<CampaignContextValue | null>(null)
@@ -32,12 +34,14 @@ export function CampaignProvider({
   campaignId: string
   children: ReactNode
 }) {
-  const [campaign, dispatch] = useReducer(campaignReducer, initialState)
-  const [isLoading, setIsLoading] = useState(true)
-  const savedCampaignRef = useRef<Campaign | null>(null)
+  const [campaign, dispatch] = useReducer(campaignReducer, undefined, () => {
+    const loaded = loadCampaignFromStorage(campaignId)
+    return loaded ?? initialState
+  })
+  const savedCampaignRef = useRef<Campaign | null>(campaign)
 
-  const reloadCampaign = useCallback(async () => {
-    const loaded = await loadCampaign(campaignId)
+  const reloadCampaign = useCallback(() => {
+    const loaded = loadCampaignFromStorage(campaignId)
     if (loaded) {
       savedCampaignRef.current = loaded
       dispatch({ type: 'LOAD_CAMPAIGN', campaign: loaded })
@@ -45,45 +49,17 @@ export function CampaignProvider({
   }, [campaignId])
 
   useEffect(() => {
-    let cancelled = false
-
-    async function load() {
-      try {
-        await reloadCampaign()
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false)
-        }
-      }
-    }
-
-    void load()
-
-    return () => {
-      cancelled = true
-    }
-  }, [reloadCampaign])
-
-  useEffect(() => {
     if (campaign === null) return
     if (campaign === savedCampaignRef.current) return
 
     savedCampaignRef.current = campaign
-    void saveCampaign({ ...campaign, updatedAt: Date.now() })
+    saveCampaign({ ...campaign, updatedAt: Date.now() })
   }, [campaign])
 
   const value = useMemo(
     () => ({ campaign, dispatch, reloadCampaign }),
     [campaign, dispatch, reloadCampaign],
   )
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground">Loading campaign…</p>
-      </div>
-    )
-  }
 
   return (
     <CampaignContext value={value}>
