@@ -222,6 +222,48 @@ describe('scenarioReducer', () => {
       })
       expect(result?.characters[0].currentHp).toBe(0)
     })
+
+    it('should remove wound, brittle, bane on heal', () => {
+      const character = createTestCharacter({
+        currentHp: 5,
+        conditions: ['wound', 'brittle', 'bane', 'poison', 'stun'],
+      })
+      const state = createTestSession({ characters: [character] })
+      const result = scenarioReducer(state, {
+        type: 'UPDATE_CHARACTER_HP',
+        characterId: 'char-1',
+        delta: 2,
+      })
+      expect(result?.characters[0].conditions).toEqual(['poison', 'stun'])
+    })
+
+    it('should remove regenerate, ward, brittle, bane on damage', () => {
+      const character = createTestCharacter({
+        currentHp: 5,
+        conditions: ['regenerate', 'ward', 'brittle', 'bane', 'poison'],
+      })
+      const state = createTestSession({ characters: [character] })
+      const result = scenarioReducer(state, {
+        type: 'UPDATE_CHARACTER_HP',
+        characterId: 'char-1',
+        delta: -2,
+      })
+      expect(result?.characters[0].conditions).toEqual(['poison'])
+    })
+
+    it('should not remove conditions when delta is 0', () => {
+      const character = createTestCharacter({
+        currentHp: 5,
+        conditions: ['wound', 'regenerate'],
+      })
+      const state = createTestSession({ characters: [character] })
+      const result = scenarioReducer(state, {
+        type: 'UPDATE_CHARACTER_HP',
+        characterId: 'char-1',
+        delta: 0,
+      })
+      expect(result?.characters[0].conditions).toEqual(['wound', 'regenerate'])
+    })
   })
 
   describe('UPDATE_CHARACTER_XP', () => {
@@ -361,6 +403,32 @@ describe('scenarioReducer', () => {
         delta: -10,
       })
       expect(result?.monsterGroups[0].standees[0].currentHp).toBe(0)
+    })
+
+    it('should remove wound, brittle, bane from standee on heal', () => {
+      const standee = createTestStandee({ currentHp: 3, conditions: ['wound', 'brittle', 'bane', 'poison'] })
+      const group = createTestMonsterGroup({ standees: [standee] })
+      const state = createTestSession({ monsterGroups: [group] })
+      const result = scenarioReducer(state, {
+        type: 'UPDATE_STANDEE_HP',
+        groupId: 'group-1',
+        standeeId: 'standee-1',
+        delta: 1,
+      })
+      expect(result?.monsterGroups[0].standees[0].conditions).toEqual(['poison'])
+    })
+
+    it('should remove regenerate, ward, brittle, bane from standee on damage', () => {
+      const standee = createTestStandee({ currentHp: 3, conditions: ['regenerate', 'ward', 'brittle', 'bane', 'stun'] })
+      const group = createTestMonsterGroup({ standees: [standee] })
+      const state = createTestSession({ monsterGroups: [group] })
+      const result = scenarioReducer(state, {
+        type: 'UPDATE_STANDEE_HP',
+        groupId: 'group-1',
+        standeeId: 'standee-1',
+        delta: -1,
+      })
+      expect(result?.monsterGroups[0].standees[0].conditions).toEqual(['stun'])
     })
   })
 
@@ -511,15 +579,50 @@ describe('scenarioReducer', () => {
 
   describe('NEXT_TURN', () => {
     it('should increment currentTurnIndex', () => {
-      const state = createTestSession({ currentTurnIndex: 0 })
-      const result = scenarioReducer(state, { type: 'NEXT_TURN' })
+      const char = createTestCharacter()
+      const state = createTestSession({ currentTurnIndex: 0, characters: [char] })
+      const result = scenarioReducer(state, { type: 'NEXT_TURN', entityId: 'char-1', entityType: 'character' })
       expect(result?.currentTurnIndex).toBe(1)
     })
 
     it('should go from null to 0', () => {
-      const state = createTestSession({ currentTurnIndex: null })
-      const result = scenarioReducer(state, { type: 'NEXT_TURN' })
+      const char = createTestCharacter()
+      const state = createTestSession({ currentTurnIndex: null, characters: [char] })
+      const result = scenarioReducer(state, { type: 'NEXT_TURN', entityId: 'char-1', entityType: 'character' })
       expect(result?.currentTurnIndex).toBe(0)
+    })
+
+    it('should remove turn-end conditions from the character whose turn ended', () => {
+      const char = createTestCharacter({
+        conditions: ['stun', 'muddle', 'invisible', 'strengthen', 'immobilize', 'disarm', 'impair', 'poison', 'wound'],
+      })
+      const state = createTestSession({ currentTurnIndex: 0, characters: [char] })
+      const result = scenarioReducer(state, { type: 'NEXT_TURN', entityId: 'char-1', entityType: 'character' })
+      expect(result?.characters[0].conditions).toEqual(['poison', 'wound'])
+    })
+
+    it('should not remove conditions from other characters', () => {
+      const char1 = createTestCharacter({ id: 'char-1', conditions: ['stun'] })
+      const char2 = createTestCharacter({ id: 'char-2', name: 'Spellweaver', conditions: ['stun'] })
+      const state = createTestSession({ currentTurnIndex: 0, characters: [char1, char2] })
+      const result = scenarioReducer(state, { type: 'NEXT_TURN', entityId: 'char-1', entityType: 'character' })
+      expect(result?.characters[0].conditions).toEqual([])
+      expect(result?.characters[1].conditions).toEqual(['stun'])
+    })
+
+    it('should remove turn-end conditions from all alive standees in the monster group', () => {
+      const group = createTestMonsterGroup({
+        standees: [
+          createTestStandee({ id: 's1', standeeNumber: 1, conditions: ['stun', 'poison'] }),
+          createTestStandee({ id: 's2', standeeNumber: 2, conditions: ['muddle', 'wound'] }),
+          createTestStandee({ id: 's3', standeeNumber: 3, alive: false, conditions: ['stun'] }),
+        ],
+      })
+      const state = createTestSession({ currentTurnIndex: 0, monsterGroups: [group] })
+      const result = scenarioReducer(state, { type: 'NEXT_TURN', entityId: 'group-1', entityType: 'monster' })
+      expect(result?.monsterGroups[0].standees[0].conditions).toEqual(['poison'])
+      expect(result?.monsterGroups[0].standees[1].conditions).toEqual(['wound'])
+      expect(result?.monsterGroups[0].standees[2].conditions).toEqual(['stun'])
     })
   })
 

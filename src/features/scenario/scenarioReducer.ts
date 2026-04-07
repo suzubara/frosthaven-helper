@@ -7,6 +7,11 @@ import type {
   MonsterStandee,
   ScenarioSession,
 } from '@/types/scenario'
+import {
+  TURN_END_CONDITIONS,
+  HEAL_CONDITIONS,
+  DAMAGE_CONDITIONS,
+} from '@/data/conditions'
 
 export type ScenarioAction =
   | { type: 'ADVANCE_ROUND' }
@@ -32,7 +37,7 @@ export type ScenarioAction =
   | { type: 'SET_MONSTER_INITIATIVE'; groupId: string; initiative: number }
   | { type: 'CLEAR_MONSTER_INITIATIVE'; groupId: string }
   | { type: 'START_ROUND' }
-  | { type: 'NEXT_TURN' }
+  | { type: 'NEXT_TURN'; entityId: string; entityType: 'character' | 'monster' }
   | { type: 'PREVIOUS_TURN' }
 
 export const initialState: ScenarioSession | null = null
@@ -77,6 +82,10 @@ function updateStandee(
 
 function getStandeeMaxHp(group: MonsterGroup, standee: MonsterStandee): number {
   return standee.rank === 'elite' ? group.maxHpElite : group.maxHpNormal
+}
+
+function removeConditions(conditions: Condition[], toRemove: Condition[]): Condition[] {
+  return conditions.filter((c) => !toRemove.includes(c))
 }
 
 export function scenarioReducer(
@@ -152,6 +161,10 @@ export function scenarioReducer(
         characters: updateCharacter(state.characters, action.characterId, (c) => ({
           ...c,
           currentHp: Math.max(0, Math.min(c.maxHp, c.currentHp + action.delta)),
+          conditions: removeConditions(
+            c.conditions,
+            action.delta > 0 ? HEAL_CONDITIONS : action.delta < 0 ? DAMAGE_CONDITIONS : [],
+          ),
         })),
       }
 
@@ -206,6 +219,10 @@ export function scenarioReducer(
             return {
               ...s,
               currentHp: Math.max(0, Math.min(maxHp, s.currentHp + action.delta)),
+              conditions: removeConditions(
+                s.conditions,
+                action.delta > 0 ? HEAL_CONDITIONS : action.delta < 0 ? DAMAGE_CONDITIONS : [],
+              ),
             }
           }),
         })),
@@ -295,6 +312,22 @@ export function scenarioReducer(
       return {
         ...state,
         currentTurnIndex: (state.currentTurnIndex ?? -1) + 1,
+        characters: action.entityType === 'character'
+          ? updateCharacter(state.characters, action.entityId, (c) => ({
+              ...c,
+              conditions: removeConditions(c.conditions, TURN_END_CONDITIONS),
+            }))
+          : state.characters,
+        monsterGroups: action.entityType === 'monster'
+          ? updateMonsterGroup(state.monsterGroups, action.entityId, (g) => ({
+              ...g,
+              standees: g.standees.map((s) =>
+                s.alive
+                  ? { ...s, conditions: removeConditions(s.conditions, TURN_END_CONDITIONS) }
+                  : s,
+              ),
+            }))
+          : state.monsterGroups,
       }
 
     case 'PREVIOUS_TURN':
