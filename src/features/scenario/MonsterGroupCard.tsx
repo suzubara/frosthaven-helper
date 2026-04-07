@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { Condition, MonsterGroup, MonsterRank, MonsterStandee } from '@/types/scenario'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
   Card,
   CardContent,
@@ -39,7 +40,7 @@ export function MonsterGroupCard({
 
   const sortedStandees = [...aliveStandees, ...deadStandees]
 
-  function getNextStandeeNumber(): number {
+  const nextAvailableNumber = useMemo(() => {
     const aliveNumbers = new Set(
       group.standees.filter((s) => s.alive).map((s) => s.standeeNumber),
     )
@@ -48,10 +49,12 @@ export function MonsterGroupCard({
       candidate++
     }
     return candidate
-  }
+  }, [group.standees])
+
+  const [customNumber, setCustomNumber] = useState<number | null>(null)
+  const standeeNumber = customNumber ?? nextAvailableNumber
 
   function handleAddStandee() {
-    const standeeNumber = getNextStandeeNumber()
     const isElite = selectedRank === 'elite'
 
     onAddStandee({
@@ -62,6 +65,7 @@ export function MonsterGroupCard({
       conditions: [],
       alive: true,
     })
+    setCustomNumber(null)
   }
 
   return (
@@ -94,6 +98,17 @@ export function MonsterGroupCard({
         ))}
 
         <div className="mt-2 flex items-center gap-2">
+          <Input
+            type="number"
+            min={1}
+            aria-label="Standee number"
+            className="w-16"
+            value={standeeNumber}
+            onChange={(e) => {
+              const val = parseInt(e.target.value)
+              setCustomNumber(Number.isNaN(val) ? null : Math.max(1, val))
+            }}
+          />
           <div className="flex overflow-hidden rounded-md border">
             <Button
               variant={selectedRank === 'normal' ? 'default' : 'ghost'}
