@@ -65,7 +65,18 @@ export function ScenarioTracker() {
         turnOrder={turnOrder}
         currentTurnIndex={session.currentTurnIndex}
         onStartRound={() => dispatch({ type: 'START_ROUND' })}
-        onNextTurn={() => dispatch({ type: 'NEXT_TURN' })}
+        onNextTurn={() => {
+          const currentEntry = session.currentTurnIndex !== null
+            ? turnOrder[session.currentTurnIndex]
+            : null
+          if (currentEntry) {
+            dispatch({
+              type: 'NEXT_TURN',
+              entityId: currentEntry.id,
+              entityType: currentEntry.type,
+            })
+          }
+        }}
         onPreviousTurn={() => dispatch({ type: 'PREVIOUS_TURN' })}
         onAdvanceRound={() => dispatch({ type: 'ADVANCE_ROUND' })}
       />
