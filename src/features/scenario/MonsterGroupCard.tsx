@@ -1,5 +1,7 @@
-import type { Condition, MonsterGroup, MonsterStandee } from '@/types/scenario'
+import { useMemo, useState } from 'react'
+import type { Condition, MonsterGroup, MonsterRank, MonsterStandee } from '@/types/scenario'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
   Card,
   CardContent,
@@ -26,6 +28,8 @@ export function MonsterGroupCard({
   onKillStandee,
   onRemoveGroup,
 }: MonsterGroupCardProps) {
+  const [selectedRank, setSelectedRank] = useState<MonsterRank>('normal')
+
   const aliveStandees = group.standees
     .filter((s) => s.alive)
     .sort((a, b) => a.standeeNumber - b.standeeNumber)
@@ -36,20 +40,32 @@ export function MonsterGroupCard({
 
   const sortedStandees = [...aliveStandees, ...deadStandees]
 
-  function handleAddStandee() {
-    const maxNumber = group.standees.reduce(
-      (max, s) => Math.max(max, s.standeeNumber),
-      0,
+  const nextAvailableNumber = useMemo(() => {
+    const aliveNumbers = new Set(
+      group.standees.filter((s) => s.alive).map((s) => s.standeeNumber),
     )
+    let candidate = 1
+    while (aliveNumbers.has(candidate)) {
+      candidate++
+    }
+    return candidate
+  }, [group.standees])
+
+  const [customNumber, setCustomNumber] = useState<number | null>(null)
+  const standeeNumber = customNumber ?? nextAvailableNumber
+
+  function handleAddStandee() {
+    const isElite = selectedRank === 'elite'
 
     onAddStandee({
       id: crypto.randomUUID(),
-      standeeNumber: maxNumber + 1,
-      rank: 'normal',
-      currentHp: group.maxHpNormal,
+      standeeNumber,
+      rank: selectedRank,
+      currentHp: isElite ? group.maxHpElite : group.maxHpNormal,
       conditions: [],
       alive: true,
     })
+    setCustomNumber(null)
   }
 
   return (
@@ -81,14 +97,44 @@ export function MonsterGroupCard({
           />
         ))}
 
-        <Button
-          variant="outline"
-          size="sm"
-          className="mt-2 self-start"
-          onClick={handleAddStandee}
-        >
-          + Add Standee
-        </Button>
+        <div className="mt-2 flex items-center gap-2">
+          <Input
+            type="number"
+            min={1}
+            aria-label="Standee number"
+            className="w-16"
+            value={standeeNumber}
+            onChange={(e) => {
+              const val = parseInt(e.target.value)
+              setCustomNumber(Number.isNaN(val) ? null : Math.max(1, val))
+            }}
+          />
+          <div className="flex overflow-hidden rounded-md border">
+            <Button
+              variant={selectedRank === 'normal' ? 'default' : 'ghost'}
+              size="sm"
+              className="rounded-none"
+              onClick={() => setSelectedRank('normal')}
+            >
+              Normal
+            </Button>
+            <Button
+              variant={selectedRank === 'elite' ? 'default' : 'ghost'}
+              size="sm"
+              className="rounded-none"
+              onClick={() => setSelectedRank('elite')}
+            >
+              Elite
+            </Button>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleAddStandee}
+          >
+            + Add Standee
+          </Button>
+        </div>
       </CardContent>
     </Card>
   )
