@@ -7,6 +7,22 @@ import { saveSession } from '@/storage/scenarios'
 
 let campaignState: Campaign | null = null
 let scenarioState: ScenarioSession | null = null
+const listeners = new Set<() => void>()
+let cachedSnapshot = { campaign: campaignState, scenario: scenarioState }
+
+function notify() {
+  cachedSnapshot = { campaign: campaignState, scenario: scenarioState }
+  listeners.forEach((fn) => fn())
+}
+
+export function subscribe(listener: () => void): () => void {
+  listeners.add(listener)
+  return () => listeners.delete(listener)
+}
+
+export function getSnapshot(): { campaign: Campaign | null; scenario: ScenarioSession | null } {
+  return cachedSnapshot
+}
 
 export function getCampaignState(): Campaign | null {
   return campaignState
@@ -22,6 +38,7 @@ export function dispatchCampaign(action: CampaignAction): void {
     campaignState = { ...campaignState, updatedAt: Date.now() }
     saveCampaign(campaignState)
   }
+  notify()
 }
 
 export function dispatchScenario(action: ScenarioAction): void {
@@ -30,6 +47,7 @@ export function dispatchScenario(action: ScenarioAction): void {
     scenarioState = { ...scenarioState, updatedAt: Date.now() }
     saveSession(scenarioState)
   }
+  notify()
 }
 
 export function loadCampaignById(id: string): Campaign | undefined {

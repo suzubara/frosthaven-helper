@@ -249,46 +249,42 @@ export function executeTool(name: string, args: Record<string, unknown>): string
     case 'get_scenario_status': {
       const s = getScenarioState()
       if (!s) return 'Error: No scenario in progress.'
-      return JSON.stringify({
-        name: s.name,
-        round: s.round,
-        elements: s.elements,
-        characters: s.characters.map((c) => ({
-          name: c.name,
-          hp: `${c.currentHp}/${c.maxHp}`,
-          xp: c.xp,
-          conditions: c.conditions,
-          initiative: c.initiative,
-          longRest: c.longRest,
-        })),
-        monsterGroups: s.monsterGroups.map((g) => ({
-          name: g.name,
-          initiative: g.initiative,
-          standees: g.standees
-            .filter((st) => st.alive)
-            .map((st) => ({
-              number: st.standeeNumber,
-              rank: st.rank,
-              hp: `${st.currentHp}/${st.rank === 'elite' ? g.maxHpElite : g.maxHpNormal}`,
-              conditions: st.conditions,
-            })),
-        })),
+      const activeElements = Object.entries(s.elements)
+        .filter(([, v]) => v !== 'inert')
+        .map(([k, v]) => `${k}: ${v}`)
+      const elemStr = activeElements.length > 0 ? activeElements.join(', ') : 'all inert'
+      const charLines = s.characters.map((c) => {
+        const conds = c.conditions.length > 0 ? ` [${c.conditions.join(', ')}]` : ''
+        const init = c.initiative !== null ? `, init ${c.initiative}` : ''
+        const rest = c.longRest ? ' (long rest)' : ''
+        return `  ${c.name}: ${c.currentHp}/${c.maxHp} HP, ${c.xp} XP${conds}${init}${rest}`
       })
+      const monsterLines = s.monsterGroups.map((g) => {
+        const alive = g.standees.filter((st) => st.alive)
+        const standeeStrs = alive.map((st) => {
+          const maxHp = st.rank === 'elite' ? g.maxHpElite : g.maxHpNormal
+          const conds = st.conditions.length > 0 ? ` [${st.conditions.join(', ')}]` : ''
+          return `    #${st.standeeNumber} (${st.rank}): ${st.currentHp}/${maxHp} HP${conds}`
+        })
+        const init = g.initiative !== null ? `, init ${g.initiative}` : ''
+        return `  ${g.name}${init}:\n${standeeStrs.join('\n')}`
+      })
+      return `Scenario: ${s.name}, Round ${s.round}\nElements: ${elemStr}\nCharacters:\n${charLines.join('\n')}\nMonsters:\n${monsterLines.join('\n')}`
     }
 
     case 'get_turn_order': {
       const s = getScenarioState()
       if (!s) return 'Error: No scenario in progress.'
       const order = getSortedTurnOrder(s.characters, s.monsterGroups, s.currentTurnIndex)
-      return JSON.stringify(
-        order.map((e) => ({
-          name: e.name,
-          type: e.type,
-          initiative: e.initiative,
-          longRest: e.longRest,
-          hasActed: e.hasActed,
-        })),
-      )
+      if (order.length === 0) return 'No entities with initiative set.'
+      return 'Turn order:\n' + order
+        .map((e, i) => {
+          const status = e.hasActed ? ' (done)' : ''
+          const rest = e.longRest ? ' (long rest)' : ''
+          const init = e.initiative !== null ? ` - initiative ${e.initiative}` : ' - no initiative'
+          return `${i + 1}. ${e.name} (${e.type})${init}${rest}${status}`
+        })
+        .join('\n')
     }
 
     // --- Scenario mutations ---
