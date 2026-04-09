@@ -32,9 +32,8 @@ export async function sendMessage(
   while (toolRounds < MAX_TOOL_ROUNDS) {
     const completion = await engine.chat.completions.create({
       messages: internalMessages as Parameters<typeof engine.chat.completions.create>[0]['messages'],
-      response_format: { type: 'json_object' },
       temperature: 0.3,
-      max_tokens: 1024,
+      max_tokens: 512,
     })
 
     const rawText = completion.choices[0]?.message?.content ?? ''
@@ -57,9 +56,9 @@ export async function sendMessage(
         }
       })
 
-      const toolResultMessage = 'Tool results:\n' + results.map((r) => `${r.name}: ${r.result}`).join('\n')
+      const toolResultMessage = 'Tool results:\n' + results.map((r) => `${r.name}: ${r.result}`).join('\n') + '\n\nNow respond to the user with a summary. Reply with JSON: { "response": "..." }'
       internalMessages.push({ role: 'assistant', content: rawText })
-      internalMessages.push({ role: 'system', content: toolResultMessage })
+      internalMessages.push({ role: 'user', content: toolResultMessage })
       toolRounds++
       continue
     }

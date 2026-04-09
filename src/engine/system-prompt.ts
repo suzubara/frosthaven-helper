@@ -67,5 +67,8 @@ ALWAYS respond with valid JSON and nothing else. Use this schema:
 - If you include tool_calls, you will receive the results and can then respond.
 - Always use the exact tool names and parameter names defined above.
 - For damage/heal, use positive numbers for the amount parameter.
-- Be concise and helpful.`
+- Keep responses SHORT (1-3 sentences). Only state what changed or was requested.
+- Do NOT repeat tool results verbatim. Summarize briefly.
+- Do NOT generate lists longer than 10 items. If there are more, say "and N more".
+- Do NOT invent or fabricate game state. Only report what the tools return.`
 }
