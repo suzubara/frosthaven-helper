@@ -84,7 +84,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   },
   {
     name: 'add_building',
-    description: 'Add a new building to the campaign',
+    description: 'Add/build/unlock a new building in the outpost (Craftsman, Alchemist, Barracks, etc.)',
     parameters: {
       name: { type: 'string', description: 'Building name' },
       level: { type: 'number', description: 'Starting level (default 1)' },
@@ -92,14 +92,14 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   },
   {
     name: 'upgrade_building',
-    description: 'Upgrade a building by name (increases level by 1)',
+    description: 'Upgrade a BUILDING to the next level. Use this when a building (Craftsman, Alchemist, Barracks, etc.) is upgraded or leveled up. NOT for characters.',
     parameters: {
       name: { type: 'string', description: 'Building name' },
     },
   },
   {
     name: 'add_character',
-    description: 'Add a new character to the campaign party',
+    description: 'Add a brand new character to the campaign party for the first time. Only use when a character is JOINING the party, not when updating an existing one.',
     parameters: {
       name: { type: 'string', description: 'Character name' },
       className: { type: 'string', description: 'Class name (e.g. Drifter, Boneshaper)' },
@@ -109,7 +109,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   },
   {
     name: 'update_character',
-    description: 'Update a campaign character\'s level or maxHp',
+    description: 'Change an existing character\'s level or max HP. Use when a character levels up, gains HP, etc. NOT for adding new characters.',
     parameters: {
       name: { type: 'string', description: 'Character name' },
       updates: {
@@ -124,7 +124,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   },
   {
     name: 'retire_character',
-    description: 'Retire a character from the party',
+    description: 'Permanently retire a character from the campaign party. The character is done adventuring.',
     parameters: {
       name: { type: 'string', description: 'Character name' },
     },
@@ -147,12 +147,12 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   },
   {
     name: 'end_scenario',
-    description: 'End the current scenario session',
+    description: 'End/finish/complete the current scenario session. Use when the scenario is over, won, lost, or done. NOT for advancing rounds.',
     parameters: {},
   },
   {
     name: 'get_scenario_status',
-    description: 'Get the current scenario state: round, elements, characters, monsters',
+    description: 'Get the current scenario state: round, elements, characters with HP, monsters with HP. Use for "scenario status", "scenario overview", "what is happening in the scenario".',
     parameters: {},
   },
   {
@@ -200,7 +200,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   },
   {
     name: 'damage_entity',
-    description: 'Deal damage to a character or monster. For monsters use "Group Name #N" format.',
+    description: 'Deal damage (reduce HP) to a character or monster during a scenario. For monsters use "Group Name #N" format. NOT for healing — use heal_entity for that.',
     parameters: {
       name: { type: 'string', description: 'Character name or "Group Name #N" for monsters' },
       amount: { type: 'number', description: 'Damage amount (positive number)' },
@@ -208,7 +208,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   },
   {
     name: 'heal_entity',
-    description: 'Heal a character or monster. For monsters use "Group Name #N" format.',
+    description: 'Restore HP to a character or monster during a scenario. Use for any healing, recovery, or HP restoration. For monsters use "Group Name #N" format.',
     parameters: {
       name: { type: 'string', description: 'Character name or "Group Name #N" for monsters' },
       amount: { type: 'number', description: 'Heal amount (positive number)' },
@@ -232,7 +232,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   },
   {
     name: 'kill_standee',
-    description: 'Kill a monster standee',
+    description: 'Instantly kill/destroy a monster standee (set HP to 0, mark as dead). Use when a monster dies, is killed, or is destroyed. NOT the same as dealing damage.',
     parameters: {
       groupName: { type: 'string', description: 'Monster group name' },
       standeeNumber: { type: 'number', description: 'Standee number' },
@@ -240,7 +240,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   },
   {
     name: 'set_initiative',
-    description: 'Set initiative for a character or monster group',
+    description: 'Set the initiative number for a character or monster group for turn order. Use when someone "goes at" a number, "has initiative", or "drew" a card number.',
     parameters: {
       name: { type: 'string', description: 'Character name or monster group name' },
       initiative: { type: 'number', description: 'Initiative value' },
@@ -248,7 +248,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
   },
   {
     name: 'next_turn',
-    description: 'Advance to the next turn in the turn order',
+    description: 'End the current entity\'s turn and move to the next one in initiative order. Use for "next turn", "end turn", "done with turn".',
     parameters: {},
   },
   {

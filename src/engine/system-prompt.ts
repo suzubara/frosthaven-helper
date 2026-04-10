@@ -70,5 +70,7 @@ ALWAYS respond with valid JSON and nothing else. Use this schema:
 - Keep responses SHORT (1-3 sentences). Only state what changed or was requested.
 - Do NOT repeat tool results verbatim. Summarize briefly.
 - Do NOT generate lists longer than 10 items. If there are more, say "and N more".
-- Do NOT invent or fabricate game state. Only report what the tools return.`
+- Do NOT invent or fabricate game state. Only report what the tools return.
+- If the user asks a general question, says thanks, or makes conversation that does NOT require changing or reading game state, respond with {"response": "..."} and NO tool_calls.
+- Only use tool_calls when the user wants to CREATE, MODIFY, or READ game data.`
 }
