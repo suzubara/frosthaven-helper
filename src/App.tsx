@@ -5,8 +5,10 @@ import { sendMessage, type ChatMessage } from '@/engine/loop'
 import ModelLoader from '@/components/ModelLoader'
 import Chat from '@/components/Chat'
 import GameStatePanel from '@/components/GameStatePanel'
+import EvalPage from '@/components/EvalPage'
 
 type AppState = 'setup' | 'loading' | 'ready'
+type View = 'chat' | 'eval'
 
 export default function App() {
   const [appState, setAppState] = useState<AppState>('setup')
@@ -14,6 +16,7 @@ export default function App() {
   const [loadProgress, setLoadProgress] = useState<{ text: string; progress: number } | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [sending, setSending] = useState(false)
+  const [view, setView] = useState<View>('chat')
 
   const handleLoadModel = useCallback(async (modelId: string) => {
     setAppState('loading')
@@ -66,23 +69,47 @@ export default function App() {
     <div className="flex h-screen flex-col">
       <header className="border-b px-4 py-2">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-bold">Frosthaven Helper</span>
-          <button
-            onClick={() => setMessages([])}
-            className="text-muted-foreground text-xs hover:underline"
-          >
-            Clear chat
-          </button>
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-bold">Frosthaven Helper</span>
+            <div className="flex gap-1">
+              <button
+                onClick={() => setView('chat')}
+                className={`rounded px-2 py-0.5 text-xs ${view === 'chat' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:underline'}`}
+              >
+                Chat
+              </button>
+              <button
+                onClick={() => setView('eval')}
+                className={`rounded px-2 py-0.5 text-xs ${view === 'eval' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:underline'}`}
+              >
+                Eval
+              </button>
+            </div>
+          </div>
+          {view === 'chat' && (
+            <button
+              onClick={() => setMessages([])}
+              className="text-muted-foreground text-xs hover:underline"
+            >
+              Clear chat
+            </button>
+          )}
         </div>
       </header>
-      <div className="flex flex-1 overflow-hidden">
-        <aside className="hidden w-64 shrink-0 overflow-y-auto border-r md:block">
-          <GameStatePanel />
-        </aside>
-        <div className="flex-1">
-          <Chat messages={messages} onSend={handleSend} sending={sending} />
+      {view === 'eval' ? (
+        <div className="flex-1 overflow-y-auto">
+          <EvalPage engine={engine!} />
         </div>
-      </div>
+      ) : (
+        <div className="flex flex-1 overflow-hidden">
+          <aside className="hidden w-64 shrink-0 overflow-y-auto border-r md:block">
+            <GameStatePanel />
+          </aside>
+          <div className="flex-1">
+            <Chat messages={messages} onSend={handleSend} sending={sending} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
