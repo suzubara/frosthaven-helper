@@ -176,7 +176,7 @@ export function executeTool(name: string, args: Record<string, unknown>): string
       return `Added building "${args.name}".`
     }
 
-    case 'upgrade_building': {
+    case 'level_up_building': {
       const c = getCampaignState()
       if (!c) return 'Error: No campaign loaded.'
       const building = c.buildings.find(
@@ -203,7 +203,7 @@ export function executeTool(name: string, args: Record<string, unknown>): string
       return `Added ${args.name} (${args.className}) to the party.`
     }
 
-    case 'update_character': {
+    case 'level_up_character': {
       const c = getCampaignState()
       if (!c) return 'Error: No campaign loaded.'
       const char = c.party.find(
@@ -385,11 +385,11 @@ export function executeTool(name: string, args: Record<string, unknown>): string
       return `Added ${rank} ${group.name} #${args.standeeNumber} (${maxHp} HP).`
     }
 
-    case 'damage_entity': {
+    case 'damage': {
       return applyHpChange(args.name as string, -(args.amount as number))
     }
 
-    case 'heal_entity': {
+    case 'heal': {
       return applyHpChange(args.name as string, args.amount as number)
     }
 
@@ -445,7 +445,7 @@ export function executeTool(name: string, args: Record<string, unknown>): string
       return `Error: No character or monster group named "${args.name}".`
     }
 
-    case 'next_turn': {
+    case 'end_turn': {
       const s = getScenarioState()
       if (!s) return 'Error: No scenario in progress.'
       const order = getSortedTurnOrder(s.characters, s.monsterGroups, s.currentTurnIndex)

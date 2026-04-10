@@ -91,7 +91,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     },
   },
   {
-    name: 'upgrade_building',
+    name: 'level_up_building',
     description: 'Upgrade a BUILDING to the next level. Use this when a building (Craftsman, Alchemist, Barracks, etc.) is upgraded or leveled up. NOT for characters.',
     parameters: {
       name: { type: 'string', description: 'Building name' },
@@ -108,7 +108,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     },
   },
   {
-    name: 'update_character',
+    name: 'level_up_character',
     description: 'Change an existing character\'s level or max HP. Use when a character levels up, gains HP, etc. NOT for adding new characters.',
     parameters: {
       name: { type: 'string', description: 'Character name' },
@@ -199,15 +199,15 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     },
   },
   {
-    name: 'damage_entity',
-    description: 'Deal damage (reduce HP) to a character or monster during a scenario. For monsters use "Group Name #N" format. NOT for healing — use heal_entity for that.',
+    name: 'damage',
+    description: 'Deal damage (reduce HP) to a character or monster during a scenario. For monsters use "Group Name #N" format. NOT for healing — use heal for that.',
     parameters: {
       name: { type: 'string', description: 'Character name or "Group Name #N" for monsters' },
       amount: { type: 'number', description: 'Damage amount (positive number)' },
     },
   },
   {
-    name: 'heal_entity',
+    name: 'heal',
     description: 'Restore HP to a character or monster during a scenario. Use for any healing, recovery, or HP restoration. For monsters use "Group Name #N" format.',
     parameters: {
       name: { type: 'string', description: 'Character name or "Group Name #N" for monsters' },
@@ -247,7 +247,7 @@ export const TOOL_DEFINITIONS: ToolDefinition[] = [
     },
   },
   {
-    name: 'next_turn',
+    name: 'end_turn',
     description: 'End the current entity\'s turn and move to the next one in initiative order. Use for "next turn", "end turn", "done with turn".',
     parameters: {},
   },

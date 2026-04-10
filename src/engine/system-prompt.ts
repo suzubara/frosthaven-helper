@@ -6,8 +6,8 @@ export function buildSystemPrompt(): string {
       'list_campaigns', 'create_campaign', 'load_campaign', 'get_campaign_status',
       'update_resource', 'update_morale', 'update_prosperity', 'update_defense',
       'update_soldiers', 'update_inspiration', 'mark_week',
-      'add_building', 'upgrade_building',
-      'add_character', 'update_character', 'retire_character',
+      'add_building', 'level_up_building',
+      'add_character', 'level_up_character', 'retire_character',
       'update_notes',
     ].includes(t.name),
   )
@@ -16,8 +16,8 @@ export function buildSystemPrompt(): string {
     [
       'start_scenario', 'end_scenario', 'get_scenario_status', 'advance_round',
       'set_element', 'add_monster_group', 'add_standee',
-      'damage_entity', 'heal_entity', 'toggle_condition', 'kill_standee',
-      'set_initiative', 'next_turn', 'get_turn_order', 'update_xp',
+      'damage', 'heal', 'toggle_condition', 'kill_standee',
+      'set_initiative', 'end_turn', 'get_turn_order', 'update_xp',
     ].includes(t.name),
   )
 
@@ -59,18 +59,22 @@ ALWAYS respond with valid JSON and nothing else. Use this schema:
   "response": "text to show the user"
 }
 
+## Important Disambiguation
+
+- "level up a CHARACTER" or "Suz is now level 3" → use level_up_character (NOT add_character)
+- "upgrade a BUILDING" or "level up the Craftsman" → use level_up_building (NOT add_building)
+- "heal Suz" or "recover HP" → use heal (NOT level_up_character)
+- "end turn" or "next turn" or "whose turn" → use end_turn (NOT get_turn_order)
+- "scenario is over" or "we won" → use end_scenario (NOT advance_round)
+- "place standee #3" or "spawn #2" → use add_standee (NOT add_monster_group)
+- Questions like "what is Frosthaven?", "thanks", "how do conditions work?" → respond with {"response": "..."} only, NO tool_calls
+
 ## Rules
 
 - If the user's request requires modifying or reading game state, include the appropriate tool_calls.
-- If responding to the user conversationally or summarizing results, include a response.
-- You can include BOTH tool_calls and response in the same message.
-- If you include tool_calls, you will receive the results and can then respond.
-- Always use the exact tool names and parameter names defined above.
+- If responding conversationally (thanks, questions about rules, etc.), respond with {"response": "..."} and NO tool_calls.
+- Always use the EXACT tool names listed above. Do NOT invent tool names.
 - For damage/heal, use positive numbers for the amount parameter.
-- Keep responses SHORT (1-3 sentences). Only state what changed or was requested.
-- Do NOT repeat tool results verbatim. Summarize briefly.
-- Do NOT generate lists longer than 10 items. If there are more, say "and N more".
-- Do NOT invent or fabricate game state. Only report what the tools return.
-- If the user asks a general question, says thanks, or makes conversation that does NOT require changing or reading game state, respond with {"response": "..."} and NO tool_calls.
-- Only use tool_calls when the user wants to CREATE, MODIFY, or READ game data.`
+- Keep responses SHORT (1-3 sentences).
+- Do NOT invent or fabricate game state. Only report what the tools return.`
 }

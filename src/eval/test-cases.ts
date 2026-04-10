@@ -83,10 +83,10 @@ export const EVAL_CASES: EvalCase[] = [
   { input: 'we constructed the Trading Post', expectedTools: ['add_building'], category: 'campaign-management' },
 
   // upgrade_building
-  { input: 'upgrade the Craftsman', expectedTools: ['upgrade_building'], category: 'campaign-management' },
-  { input: 'level up the Alchemist', expectedTools: ['upgrade_building'], category: 'campaign-management' },
-  { input: 'upgrade Barracks to level 2', expectedTools: ['upgrade_building'], category: 'campaign-management' },
-  { input: 'the Craftsman gets an upgrade', expectedTools: ['upgrade_building'], category: 'campaign-management' },
+  { input: 'upgrade the Craftsman', expectedTools: ['level_up_building'], category: 'campaign-management' },
+  { input: 'level up the Alchemist', expectedTools: ['level_up_building'], category: 'campaign-management' },
+  { input: 'upgrade Barracks to level 2', expectedTools: ['level_up_building'], category: 'campaign-management' },
+  { input: 'the Craftsman gets an upgrade', expectedTools: ['level_up_building'], category: 'campaign-management' },
 
   // add_character
   { input: 'add a new character named Suz class Drifter', expectedTools: ['add_character'], category: 'campaign-management' },
@@ -95,10 +95,10 @@ export const EVAL_CASES: EvalCase[] = [
   { input: 'new character AJ playing a Boneshaper at level 1 with 6 HP', expectedTools: ['add_character'], category: 'campaign-management' },
 
   // update_character
-  { input: 'level up Suz to level 3', expectedTools: ['update_character'], category: 'campaign-management' },
-  { input: "update Joah's HP to 8", expectedTools: ['update_character'], category: 'campaign-management' },
-  { input: 'Suz is now level 2', expectedTools: ['update_character'], category: 'campaign-management' },
-  { input: "change AJ's max HP to 7", expectedTools: ['update_character'], category: 'campaign-management' },
+  { input: 'level up Suz to level 3', expectedTools: ['level_up_character'], category: 'campaign-management' },
+  { input: "update Joah's HP to 8", expectedTools: ['level_up_character'], category: 'campaign-management' },
+  { input: 'Suz is now level 2', expectedTools: ['level_up_character'], category: 'campaign-management' },
+  { input: "change AJ's max HP to 7", expectedTools: ['level_up_character'], category: 'campaign-management' },
 
   // retire_character
   { input: 'retire Suz', expectedTools: ['retire_character'], category: 'campaign-management' },
@@ -158,17 +158,17 @@ export const EVAL_CASES: EvalCase[] = [
   { input: 'add elite guard standee number 4', expectedTools: ['add_standee'], category: 'scenario-management' },
 
   // damage_entity
-  { input: 'Suz takes 3 damage', expectedTools: ['damage_entity'], category: 'scenario-management' },
-  { input: 'hit living bones #1 for 4', expectedTools: ['damage_entity'], category: 'scenario-management' },
-  { input: 'deal 2 damage to Joah', expectedTools: ['damage_entity'], category: 'scenario-management' },
-  { input: 'frost demon #2 takes 5 damage', expectedTools: ['damage_entity'], category: 'scenario-management' },
-  { input: 'attack guard #1 for 3', expectedTools: ['damage_entity'], category: 'scenario-management' },
+  { input: 'Suz takes 3 damage', expectedTools: ['damage'], category: 'scenario-management' },
+  { input: 'hit living bones #1 for 4', expectedTools: ['damage'], category: 'scenario-management' },
+  { input: 'deal 2 damage to Joah', expectedTools: ['damage'], category: 'scenario-management' },
+  { input: 'frost demon #2 takes 5 damage', expectedTools: ['damage'], category: 'scenario-management' },
+  { input: 'attack guard #1 for 3', expectedTools: ['damage'], category: 'scenario-management' },
 
   // heal_entity
-  { input: 'heal Suz for 3', expectedTools: ['heal_entity'], category: 'scenario-management' },
-  { input: 'Joah recovers 2 HP', expectedTools: ['heal_entity'], category: 'scenario-management' },
-  { input: 'living bones #1 heals 1', expectedTools: ['heal_entity'], category: 'scenario-management' },
-  { input: 'restore 4 HP to AJ', expectedTools: ['heal_entity'], category: 'scenario-management' },
+  { input: 'heal Suz for 3', expectedTools: ['heal'], category: 'scenario-management' },
+  { input: 'Joah recovers 2 HP', expectedTools: ['heal'], category: 'scenario-management' },
+  { input: 'living bones #1 heals 1', expectedTools: ['heal'], category: 'scenario-management' },
+  { input: 'restore 4 HP to AJ', expectedTools: ['heal'], category: 'scenario-management' },
 
   // toggle_condition
   { input: 'poison Suz', expectedTools: ['toggle_condition'], category: 'scenario-management' },
@@ -190,10 +190,10 @@ export const EVAL_CASES: EvalCase[] = [
   { input: 'living bones drew 72', expectedTools: ['set_initiative'], category: 'scenario-management' },
 
   // next_turn
-  { input: 'next turn', expectedTools: ['next_turn'], category: 'scenario-management' },
-  { input: 'end turn', expectedTools: ['next_turn'], category: 'scenario-management' },
-  { input: 'whose turn is it next', expectedTools: ['next_turn'], category: 'scenario-management' },
-  { input: "done with this turn, who's next", expectedTools: ['next_turn'], category: 'scenario-management' },
+  { input: 'next turn', expectedTools: ['end_turn'], category: 'scenario-management' },
+  { input: 'end turn', expectedTools: ['end_turn'], category: 'scenario-management' },
+  { input: 'whose turn is it next', expectedTools: ['end_turn'], category: 'scenario-management' },
+  { input: "done with this turn, who's next", expectedTools: ['end_turn'], category: 'scenario-management' },
 
   // get_turn_order
   { input: 'show turn order', expectedTools: ['get_turn_order'], category: 'scenario-management' },
@@ -216,7 +216,7 @@ export const EVAL_CASES: EvalCase[] = [
   },
   {
     input: 'Suz takes 4 damage and is poisoned',
-    expectedTools: ['damage_entity', 'toggle_condition'],
+    expectedTools: ['damage', 'toggle_condition'],
     category: 'multi-tool',
   },
   {
@@ -226,7 +226,7 @@ export const EVAL_CASES: EvalCase[] = [
   },
   {
     input: 'heal Joah for 3 and remove wound from Joah',
-    expectedTools: ['heal_entity', 'toggle_condition'],
+    expectedTools: ['heal', 'toggle_condition'],
     category: 'multi-tool',
   },
   {
@@ -236,7 +236,7 @@ export const EVAL_CASES: EvalCase[] = [
   },
   {
     input: 'Suz gains 2 XP and levels up to level 3',
-    expectedTools: ['update_xp', 'update_character'],
+    expectedTools: ['update_xp', 'level_up_character'],
     category: 'multi-tool',
   },
   {
@@ -246,7 +246,7 @@ export const EVAL_CASES: EvalCase[] = [
   },
   {
     input: 'hit frost demon #1 for 5 and stun it',
-    expectedTools: ['damage_entity', 'toggle_condition'],
+    expectedTools: ['damage', 'toggle_condition'],
     category: 'multi-tool',
   },
   {
