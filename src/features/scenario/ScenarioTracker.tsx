@@ -1,10 +1,8 @@
 import { useMemo } from 'react'
 import { useScenario } from '@/features/scenario/ScenarioContext'
-import { RoundTracker } from '@/features/scenario/RoundTracker'
-import { ElementBoard } from '@/features/scenario/ElementBoard'
 import { CharacterCard } from '@/features/scenario/CharacterCard'
 import { MonsterGroupCard } from '@/features/scenario/MonsterGroupCard'
-import { TurnOrderPanel } from '@/features/scenario/TurnOrderPanel'
+import { ScenarioCommandBar } from '@/features/scenario/ScenarioCommandBar'
 import { InitiativeInput } from '@/features/scenario/InitiativeInput'
 import { getSortedTurnOrder } from '@/features/scenario/turnOrder'
 import { Button } from '@/components/ui/button'
@@ -50,30 +48,14 @@ export function ScenarioTracker() {
   }
 
   return (
-    <div className="mx-auto flex max-w-3xl flex-col gap-6 p-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{session.name}</h1>
-        <div className="flex items-center gap-4">
-          <RoundTracker
-            round={session.round}
-            onAdvance={() => dispatch({ type: 'ADVANCE_ROUND' })}
-            onRewind={() => dispatch({ type: 'REWIND_ROUND' })}
-          />
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={handleEndSession}
-          >
-            End Session
-          </Button>
-        </div>
-      </div>
-
-      {/* Turn Order */}
-      <TurnOrderPanel
+    <div className="mx-auto flex max-w-7xl flex-col gap-4 p-3 sm:p-4">
+      {/* Scenario command bar */}
+      <ScenarioCommandBar
+        scenarioName={session.name}
+        round={session.round}
         turnOrder={turnOrder}
         currentTurnIndex={session.currentTurnIndex}
+        elements={session.elements}
         onStartRound={() => dispatch({ type: 'START_ROUND' })}
         onNextTurn={() => {
           const currentEntry = session.currentTurnIndex !== null
@@ -89,6 +71,11 @@ export function ScenarioTracker() {
         }}
         onPreviousTurn={() => dispatch({ type: 'PREVIOUS_TURN' })}
         onAdvanceRound={() => dispatch({ type: 'ADVANCE_ROUND' })}
+        onRewindRound={() => dispatch({ type: 'REWIND_ROUND' })}
+        onSetElement={(element, state) =>
+          dispatch({ type: 'SET_ELEMENT', element, state })
+        }
+        onEndSession={handleEndSession}
       />
 
       {/* Initiative Input */}
@@ -112,18 +99,10 @@ export function ScenarioTracker() {
         }
       />
 
-      {/* Element Board */}
-      <ElementBoard
-        elements={session.elements}
-        onSetElement={(element, state) =>
-          dispatch({ type: 'SET_ELEMENT', element, state })
-        }
-      />
-
       {/* Characters */}
       <section>
         <h2 className="mb-3 text-lg font-semibold">Characters</h2>
-        <div className="flex flex-col gap-3">
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
           {session.characters.map((character) => (
             <CharacterCard
               key={character.id}
@@ -162,7 +141,7 @@ export function ScenarioTracker() {
             + Add Group
           </Button>
         </div>
-        <div className="flex flex-col gap-3">
+        <div className="grid gap-3 lg:grid-cols-2">
           {session.monsterGroups.map((group) => (
             <MonsterGroupCard
               key={group.id}

@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite'
 import { fn } from 'storybook/test'
-import { TurnOrderPanel } from '@/features/scenario/TurnOrderPanel'
+import { ScenarioCommandBar } from '@/features/scenario/ScenarioCommandBar'
 import type { TurnOrderEntry } from '@/features/scenario/turnOrder'
+import { createDefaultElements } from '@/data/elements'
 
 const sampleEntries: TurnOrderEntry[] = [
   { id: '1', name: 'Brynn', type: 'character', initiative: 7, longRest: false, hasActed: false },
@@ -13,15 +14,21 @@ const sampleEntries: TurnOrderEntry[] = [
 ]
 
 const meta = {
-  title: 'Scenario/TurnOrderPanel',
-  component: TurnOrderPanel,
+  title: 'Scenario/ScenarioCommandBar',
+  component: ScenarioCommandBar,
   args: {
+    scenarioName: 'Roadside Ambush',
+    round: 3,
+    elements: createDefaultElements(),
     onStartRound: fn(),
     onNextTurn: fn(),
     onPreviousTurn: fn(),
     onAdvanceRound: fn(),
+    onRewindRound: fn(),
+    onSetElement: fn(),
+    onEndSession: fn(),
   },
-} satisfies Meta<typeof TurnOrderPanel>
+} satisfies Meta<typeof ScenarioCommandBar>
 
 export default meta
 type Story = StoryObj<typeof meta>

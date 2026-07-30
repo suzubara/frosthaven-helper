@@ -37,6 +37,7 @@ describe('ScenarioTracker', () => {
     const user = userEvent.setup()
     render(<ScenarioTracker />)
 
+    await user.click(screen.getByLabelText('Session actions'))
     await user.click(screen.getByRole('button', { name: 'End Session' }))
 
     expect(confirm).toHaveBeenCalledWith(
@@ -50,8 +51,63 @@ describe('ScenarioTracker', () => {
     const user = userEvent.setup()
     render(<ScenarioTracker />)
 
+    await user.click(screen.getByLabelText('Session actions'))
     await user.click(screen.getByRole('button', { name: 'End Session' }))
 
     expect(mocks.dispatch).toHaveBeenCalledWith({ type: 'END_SESSION' })
+  })
+
+  it('starts the round from the primary command bar action', async () => {
+    const user = userEvent.setup()
+    render(<ScenarioTracker />)
+
+    await user.click(screen.getByRole('button', { name: 'Start Round' }))
+
+    expect(mocks.dispatch).toHaveBeenCalledWith({ type: 'START_ROUND' })
+  })
+
+  it('advances to the next turn from the primary command bar action', async () => {
+    mocks.useScenario.mockReturnValue({
+      session: {
+        ...session,
+        characters: [
+          {
+            id: 'character-1',
+            name: 'Banner Spear',
+            maxHp: 10,
+            currentHp: 10,
+            xp: 0,
+            conditions: [],
+            initiative: 21,
+            longRest: false,
+          },
+        ],
+        currentTurnIndex: 0,
+      },
+      dispatch: mocks.dispatch,
+    })
+    const user = userEvent.setup()
+    render(<ScenarioTracker />)
+
+    await user.click(screen.getByRole('button', { name: 'Next Turn' }))
+
+    expect(mocks.dispatch).toHaveBeenCalledWith({
+      type: 'NEXT_TURN',
+      entityId: 'character-1',
+      entityType: 'character',
+    })
+  })
+
+  it('advances the round when all turns are complete', async () => {
+    mocks.useScenario.mockReturnValue({
+      session: { ...session, currentTurnIndex: 0 },
+      dispatch: mocks.dispatch,
+    })
+    const user = userEvent.setup()
+    render(<ScenarioTracker />)
+
+    await user.click(screen.getByRole('button', { name: 'Next Round' }))
+
+    expect(mocks.dispatch).toHaveBeenCalledWith({ type: 'ADVANCE_ROUND' })
   })
 })
