@@ -39,6 +39,16 @@ export function ScenarioTracker() {
     dispatch({ type: 'ADD_MONSTER_GROUP', group })
   }
 
+  function handleEndSession() {
+    if (
+      window.confirm(
+        'End this session? This will permanently delete its saved tracker data.',
+      )
+    ) {
+      dispatch({ type: 'END_SESSION' })
+    }
+  }
+
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6 p-4">
       {/* Header */}
@@ -53,7 +63,7 @@ export function ScenarioTracker() {
           <Button
             variant="destructive"
             size="sm"
-            onClick={() => dispatch({ type: 'END_SESSION' })}
+            onClick={handleEndSession}
           >
             End Session
           </Button>
