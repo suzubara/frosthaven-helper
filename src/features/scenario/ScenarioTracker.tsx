@@ -98,25 +98,27 @@ export function ScenarioTracker() {
       />
 
       {/* Initiative Input */}
-      <InitiativeInput
-        characters={session.characters}
-        monsterGroups={session.monsterGroups}
-        onSetCharacterInitiative={(characterId, initiative) =>
-          dispatch({ type: 'SET_CHARACTER_INITIATIVE', characterId, initiative })
-        }
-        onSetCharacterLongRest={(characterId) =>
-          dispatch({ type: 'SET_CHARACTER_LONG_REST', characterId })
-        }
-        onClearCharacterInitiative={(characterId) =>
-          dispatch({ type: 'CLEAR_CHARACTER_INITIATIVE', characterId })
-        }
-        onSetMonsterInitiative={(groupId, initiative) =>
-          dispatch({ type: 'SET_MONSTER_INITIATIVE', groupId, initiative })
-        }
-        onClearMonsterInitiative={(groupId) =>
-          dispatch({ type: 'CLEAR_MONSTER_INITIATIVE', groupId })
-        }
-      />
+      {session.currentTurnIndex === null && (
+        <InitiativeInput
+          characters={session.characters}
+          monsterGroups={session.monsterGroups}
+          onSetCharacterInitiative={(characterId, initiative) =>
+            dispatch({ type: 'SET_CHARACTER_INITIATIVE', characterId, initiative })
+          }
+          onSetCharacterLongRest={(characterId) =>
+            dispatch({ type: 'SET_CHARACTER_LONG_REST', characterId })
+          }
+          onClearCharacterInitiative={(characterId) =>
+            dispatch({ type: 'CLEAR_CHARACTER_INITIATIVE', characterId })
+          }
+          onSetMonsterInitiative={(groupId, initiative) =>
+            dispatch({ type: 'SET_MONSTER_INITIATIVE', groupId, initiative })
+          }
+          onClearMonsterInitiative={(groupId) =>
+            dispatch({ type: 'CLEAR_MONSTER_INITIATIVE', groupId })
+          }
+        />
+      )}
 
       {/* Characters */}
       <section>

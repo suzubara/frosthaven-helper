@@ -66,6 +66,23 @@ describe('ScenarioTracker', () => {
     expect(mocks.dispatch).toHaveBeenCalledWith({ type: 'START_ROUND' })
   })
 
+  it('shows initiative before the round starts', () => {
+    render(<ScenarioTracker />)
+
+    expect(screen.getByText('Set Initiative')).toBeInTheDocument()
+  })
+
+  it('hides initiative after the round starts', () => {
+    mocks.useScenario.mockReturnValue({
+      session: { ...session, currentTurnIndex: 0 },
+      dispatch: mocks.dispatch,
+    })
+
+    render(<ScenarioTracker />)
+
+    expect(screen.queryByText('Set Initiative')).not.toBeInTheDocument()
+  })
+
   it('advances to the next turn from the primary command bar action', async () => {
     mocks.useScenario.mockReturnValue({
       session: {
