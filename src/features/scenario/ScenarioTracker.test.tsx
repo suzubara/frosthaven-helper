@@ -110,4 +110,27 @@ describe('ScenarioTracker', () => {
 
     expect(mocks.dispatch).toHaveBeenCalledWith({ type: 'ADVANCE_ROUND' })
   })
+
+  it('adds a monster group with the entered name and HP values', async () => {
+    const user = userEvent.setup()
+    render(<ScenarioTracker />)
+
+    await user.click(screen.getByRole('button', { name: '+ Add Group' }))
+    await user.type(screen.getByLabelText('Group Name'), 'Algox Guards')
+    await user.type(screen.getByLabelText('Normal HP'), '8')
+    await user.type(screen.getByLabelText('Elite HP'), '12')
+    await user.click(screen.getByRole('button', { name: 'Add Monster Group' }))
+
+    expect(mocks.dispatch).toHaveBeenCalledWith({
+      type: 'ADD_MONSTER_GROUP',
+      group: {
+        id: expect.any(String),
+        name: 'Algox Guards',
+        maxHpNormal: 8,
+        maxHpElite: 12,
+        standees: [],
+        initiative: null,
+      },
+    })
+  })
 })

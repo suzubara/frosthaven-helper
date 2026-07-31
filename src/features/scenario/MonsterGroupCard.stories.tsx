@@ -6,6 +6,7 @@ const meta = {
   title: 'Scenario/MonsterGroupCard',
   component: MonsterGroupCard,
   args: {
+    onUpdateName: fn(),
     onAddStandee: fn(),
     onUpdateStandeeHp: fn(),
     onToggleStandeeCondition: fn(),

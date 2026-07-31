@@ -325,6 +325,21 @@ describe('scenarioReducer', () => {
     })
   })
 
+  describe('UPDATE_MONSTER_GROUP_NAME', () => {
+    it('should update the target monster group name', () => {
+      const group = createTestMonsterGroup({ name: 'Living Bones' })
+      const state = createTestSession({ monsterGroups: [group] })
+      const result = scenarioReducer(state, {
+        type: 'UPDATE_MONSTER_GROUP_NAME',
+        groupId: 'group-1',
+        name: 'Living Corpses',
+      })
+
+      expect(result?.monsterGroups[0].name).toBe('Living Corpses')
+      expect(result?.monsterGroups[0].standees).toBe(group.standees)
+    })
+  })
+
   describe('REMOVE_MONSTER_GROUP', () => {
     it('should remove a monster group by id', () => {
       const group = createTestMonsterGroup()

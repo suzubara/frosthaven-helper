@@ -24,6 +24,7 @@ export type ScenarioAction =
   | { type: 'UPDATE_CHARACTER_XP'; characterId: string; delta: number }
   | { type: 'TOGGLE_CHARACTER_CONDITION'; characterId: string; condition: Condition }
   | { type: 'ADD_MONSTER_GROUP'; group: MonsterGroup }
+  | { type: 'UPDATE_MONSTER_GROUP_NAME'; groupId: string; name: string }
   | { type: 'REMOVE_MONSTER_GROUP'; groupId: string }
   | { type: 'ADD_STANDEE'; groupId: string; standee: MonsterStandee }
   | { type: 'UPDATE_STANDEE_HP'; groupId: string; standeeId: string; delta: number }
@@ -192,6 +193,15 @@ export function scenarioReducer(
       return {
         ...state,
         monsterGroups: [...state.monsterGroups, action.group],
+      }
+
+    case 'UPDATE_MONSTER_GROUP_NAME':
+      return {
+        ...state,
+        monsterGroups: updateMonsterGroup(state.monsterGroups, action.groupId, (g) => ({
+          ...g,
+          name: action.name,
+        })),
       }
 
     case 'REMOVE_MONSTER_GROUP':

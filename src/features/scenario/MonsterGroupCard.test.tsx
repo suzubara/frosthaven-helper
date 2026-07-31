@@ -35,9 +35,11 @@ function createTestGroup(
 function renderCard(groupOverrides: Partial<MonsterGroup> = {}) {
   const group = createTestGroup(groupOverrides)
   const onAddStandee = vi.fn()
+  const onUpdateName = vi.fn()
   const result = render(
     <MonsterGroupCard
       group={group}
+      onUpdateName={onUpdateName}
       onAddStandee={onAddStandee}
       onUpdateStandeeHp={vi.fn()}
       onToggleStandeeCondition={vi.fn()}
@@ -45,10 +47,19 @@ function renderCard(groupOverrides: Partial<MonsterGroup> = {}) {
       onRemoveGroup={vi.fn()}
     />,
   )
-  return { ...result, onAddStandee, group }
+  return { ...result, onAddStandee, onUpdateName, group }
 }
 
 describe('MonsterGroupCard', () => {
+  it('updates the monster group name', async () => {
+    const user = userEvent.setup()
+    const { onUpdateName } = renderCard()
+
+    await user.clear(screen.getByLabelText('Monster group name'))
+
+    expect(onUpdateName).toHaveBeenLastCalledWith('')
+  })
+
   describe('Bug #13: reuse eliminated enemy numbers', () => {
     it('should reuse the lowest dead standee number when adding', async () => {
       const user = userEvent.setup()

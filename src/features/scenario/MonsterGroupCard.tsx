@@ -13,6 +13,7 @@ import { MonsterStandeeRow } from '@/features/scenario/MonsterStandeeRow'
 
 interface MonsterGroupCardProps {
   group: MonsterGroup
+  onUpdateName: (name: string) => void
   onAddStandee: (standee: MonsterStandee) => void
   onUpdateStandeeHp: (standeeId: string, delta: number) => void
   onToggleStandeeCondition: (standeeId: string, condition: Condition) => void
@@ -22,6 +23,7 @@ interface MonsterGroupCardProps {
 
 export function MonsterGroupCard({
   group,
+  onUpdateName,
   onAddStandee,
   onUpdateStandeeHp,
   onToggleStandeeCondition,
@@ -71,7 +73,14 @@ export function MonsterGroupCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{group.name}</CardTitle>
+        <CardTitle>
+          <Input
+            aria-label="Monster group name"
+            className="h-9 max-w-sm text-base font-semibold"
+            value={group.name}
+            onChange={(event) => onUpdateName(event.target.value)}
+          />
+        </CardTitle>
         <CardAction>
           <Button variant="destructive" size="sm" onClick={onRemoveGroup}>
             Remove Group
