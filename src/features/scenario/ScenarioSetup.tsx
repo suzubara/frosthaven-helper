@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { MonsterRank, ScenarioSession } from '@/types/scenario'
+import type { MonsterGroup, MonsterRank, ScenarioSession } from '@/types/scenario'
 import type { PartyCharacter } from '@/types/campaign'
 import { createDefaultElements } from '@/data/elements'
 import { Button } from '@/components/ui/button'
@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { AdHocEnemyForm } from '@/features/scenario/AdHocEnemyForm'
 
 interface CharacterEntry {
   name: string
@@ -43,6 +44,7 @@ export function ScenarioSetup({
   const [characters, setCharacters] =
     useState<CharacterEntry[]>(initialCharacters)
   const [monsterGroups, setMonsterGroups] = useState<MonsterGroupEntry[]>([])
+  const [adHocEnemies, setAdHocEnemies] = useState<MonsterGroup[]>([])
 
   function addCharacter() {
     setCharacters([...characters, { name: '', maxHp: 0 }])
@@ -150,21 +152,24 @@ export function ScenarioSetup({
         initiative: null,
         longRest: false,
       })),
-      monsterGroups: monsterGroups.map((g) => ({
-        id: crypto.randomUUID(),
-        name: g.name,
-        maxHpNormal: g.maxHpNormal,
-        maxHpElite: g.maxHpElite,
-        standees: g.standees.map((s) => ({
+      monsterGroups: [
+        ...monsterGroups.map((g) => ({
           id: crypto.randomUUID(),
-          standeeNumber: s.standeeNumber,
-          rank: s.rank,
-          currentHp: s.rank === 'elite' ? g.maxHpElite : g.maxHpNormal,
-          conditions: [],
-          alive: true,
+          name: g.name,
+          maxHpNormal: g.maxHpNormal,
+          maxHpElite: g.maxHpElite,
+          standees: g.standees.map((s) => ({
+            id: crypto.randomUUID(),
+            standeeNumber: s.standeeNumber,
+            rank: s.rank,
+            currentHp: s.rank === 'elite' ? g.maxHpElite : g.maxHpNormal,
+            conditions: [],
+            alive: true,
+          })),
+          initiative: null,
         })),
-        initiative: null,
-      })),
+        ...adHocEnemies,
+      ],
       currentTurnIndex: null,
       createdAt: now,
       updatedAt: now,
@@ -372,6 +377,48 @@ export function ScenarioSetup({
           <Button type="button" variant="outline" onClick={addMonsterGroup}>
             Add Monster Group
           </Button>
+        </CardContent>
+      </Card>
+
+      {/* Ad hoc enemies */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Ad Hoc Enemies</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <p className="text-sm text-muted-foreground">
+            Add bosses or special enemies that have their own name and HP.
+          </p>
+          {adHocEnemies.map((enemy) => (
+            <div
+              key={enemy.id}
+              className="flex items-center justify-between rounded-lg border p-3"
+            >
+              <span className="font-medium">{enemy.name}</span>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-muted-foreground">
+                  {enemy.standees[0]?.maxHp} HP
+                </span>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={() =>
+                    setAdHocEnemies((enemies) =>
+                      enemies.filter((candidate) => candidate.id !== enemy.id),
+                    )
+                  }
+                >
+                  Remove
+                </Button>
+              </div>
+            </div>
+          ))}
+          <AdHocEnemyForm
+            onAdd={(enemy) =>
+              setAdHocEnemies((enemies) => [...enemies, enemy])
+            }
+          />
         </CardContent>
       </Card>
 

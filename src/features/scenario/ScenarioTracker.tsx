@@ -10,10 +10,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import type { MonsterGroup, MonsterStandee } from '@/types/scenario'
+import { AdHocEnemyForm } from '@/features/scenario/AdHocEnemyForm'
 
 export function ScenarioTracker() {
   const { session, dispatch } = useScenario()
-  const [addingMonsterGroup, setAddingMonsterGroup] = useState(false)
+  const [addingEnemy, setAddingEnemy] = useState<'group' | 'adHoc' | null>(null)
   const [newMonsterGroup, setNewMonsterGroup] = useState({
     name: '',
     maxHpNormal: '',
@@ -53,7 +54,7 @@ export function ScenarioTracker() {
 
   function resetNewMonsterGroup() {
     setNewMonsterGroup({ name: '', maxHpNormal: '', maxHpElite: '' })
-    setAddingMonsterGroup(false)
+    setAddingEnemy(null)
   }
 
   function handleEndSession() {
@@ -158,18 +159,27 @@ export function ScenarioTracker() {
       <section>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-semibold">Monster Groups</h2>
-          {!addingMonsterGroup && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setAddingMonsterGroup(true)}
-            >
-              + Add Group
-            </Button>
+          {!addingEnemy && (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setAddingEnemy('group')}
+              >
+                + Add Group
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setAddingEnemy('adHoc')}
+              >
+                + Add Enemy
+              </Button>
+            </div>
           )}
         </div>
         <div className="grid gap-3 lg:grid-cols-2">
-          {addingMonsterGroup && (
+          {addingEnemy === 'group' && (
             <Card>
               <form onSubmit={handleAddMonsterGroup}>
                 <CardHeader>
@@ -246,6 +256,22 @@ export function ScenarioTracker() {
                   </div>
                 </CardContent>
               </form>
+            </Card>
+          )}
+          {addingEnemy === 'adHoc' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>New Ad Hoc Enemy</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AdHocEnemyForm
+                  onAdd={(enemy) => {
+                    dispatch({ type: 'ADD_MONSTER_GROUP', group: enemy })
+                    setAddingEnemy(null)
+                  }}
+                  onCancel={() => setAddingEnemy(null)}
+                />
+              </CardContent>
             </Card>
           )}
           {session.monsterGroups.map((group) => (

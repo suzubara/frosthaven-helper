@@ -98,3 +98,27 @@ export const AllDead: Story = {
     },
   },
 }
+
+export const AdHocEnemy: Story = {
+  args: {
+    group: {
+      id: '4',
+      name: 'Scenario Boss',
+      maxHpNormal: 25,
+      maxHpElite: 25,
+      initiative: null,
+      isAdHoc: true,
+      standees: [
+        {
+          id: 'boss-1',
+          standeeNumber: 1,
+          rank: 'boss',
+          maxHp: 25,
+          currentHp: 25,
+          conditions: ['wound'],
+          alive: true,
+        },
+      ],
+    },
+  },
+}

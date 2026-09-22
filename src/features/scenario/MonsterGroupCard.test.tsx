@@ -163,4 +163,25 @@ describe('MonsterGroupCard', () => {
       expect(addedStandee.currentHp).toBe(5)
     })
   })
+
+  it('renders an ad hoc enemy with its independent HP and no standee controls', () => {
+    renderCard({
+      name: 'Ice Wraith',
+      isAdHoc: true,
+      maxHpNormal: 5,
+      maxHpElite: 9,
+      standees: [
+        createTestStandee({
+          rank: 'boss',
+          maxHp: 17,
+          currentHp: 17,
+        }),
+      ],
+    })
+
+    expect(screen.getByLabelText('Enemy name')).toHaveValue('Ice Wraith')
+    expect(screen.getByText('17/17')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Remove Enemy' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /add standee/i })).not.toBeInTheDocument()
+  })
 })

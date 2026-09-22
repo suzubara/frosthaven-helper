@@ -38,12 +38,14 @@ export interface MonsterGroup {
   maxHpElite: number
   standees: MonsterStandee[]
   initiative: number | null
+  isAdHoc?: boolean
 }
 
 export interface MonsterStandee {
   id: string
   standeeNumber: number
   rank: MonsterRank
+  maxHp?: number
   currentHp: number
   conditions: Condition[]
   alive: boolean

@@ -12,6 +12,7 @@ import {
   HEAL_CONDITIONS,
   DAMAGE_CONDITIONS,
 } from '@/data/conditions'
+import { getMonsterStandeeMaxHp } from '@/features/scenario/monster'
 
 export type ScenarioAction =
   | { type: 'ADVANCE_ROUND' }
@@ -79,10 +80,6 @@ function updateStandee(
   updater: (s: MonsterStandee) => MonsterStandee,
 ): MonsterStandee[] {
   return standees.map((s) => (s.id === standeeId ? updater(s) : s))
-}
-
-function getStandeeMaxHp(group: MonsterGroup, standee: MonsterStandee): number {
-  return standee.rank === 'elite' ? group.maxHpElite : group.maxHpNormal
 }
 
 function removeConditions(conditions: Condition[], toRemove: Condition[]): Condition[] {
@@ -225,7 +222,7 @@ export function scenarioReducer(
         monsterGroups: updateMonsterGroup(state.monsterGroups, action.groupId, (g) => ({
           ...g,
           standees: updateStandee(g.standees, action.standeeId, (s) => {
-            const maxHp = getStandeeMaxHp(g, s)
+            const maxHp = getMonsterStandeeMaxHp(g, s)
             return {
               ...s,
               currentHp: Math.max(0, Math.min(maxHp, s.currentHp + action.delta)),

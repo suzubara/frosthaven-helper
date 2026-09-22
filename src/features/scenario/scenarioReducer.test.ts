@@ -407,6 +407,29 @@ describe('scenarioReducer', () => {
       expect(result?.monsterGroups[0].standees[0].currentHp).toBe(9)
     })
 
+    it('should clamp an ad hoc enemy at its independent max HP', () => {
+      const standee = createTestStandee({
+        rank: 'boss',
+        maxHp: 17,
+        currentHp: 16,
+      })
+      const group = createTestMonsterGroup({
+        isAdHoc: true,
+        maxHpNormal: 5,
+        maxHpElite: 9,
+        standees: [standee],
+      })
+      const state = createTestSession({ monsterGroups: [group] })
+      const result = scenarioReducer(state, {
+        type: 'UPDATE_STANDEE_HP',
+        groupId: 'group-1',
+        standeeId: 'standee-1',
+        delta: 5,
+      })
+
+      expect(result?.monsterGroups[0].standees[0].currentHp).toBe(17)
+    })
+
     it('should clamp standee HP at 0', () => {
       const standee = createTestStandee({ currentHp: 2 })
       const group = createTestMonsterGroup({ standees: [standee] })

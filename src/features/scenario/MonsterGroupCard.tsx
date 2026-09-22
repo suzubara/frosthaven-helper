@@ -10,6 +10,7 @@ import {
   CardAction,
 } from '@/components/ui/card'
 import { MonsterStandeeRow } from '@/features/scenario/MonsterStandeeRow'
+import { getMonsterStandeeMaxHp } from '@/features/scenario/monster'
 
 interface MonsterGroupCardProps {
   group: MonsterGroup
@@ -75,7 +76,7 @@ export function MonsterGroupCard({
       <CardHeader>
         <CardTitle>
           <Input
-            aria-label="Monster group name"
+            aria-label={group.isAdHoc ? 'Enemy name' : 'Monster group name'}
             className="h-9 max-w-sm text-base font-semibold"
             value={group.name}
             onChange={(event) => onUpdateName(event.target.value)}
@@ -83,7 +84,7 @@ export function MonsterGroupCard({
         </CardTitle>
         <CardAction>
           <Button variant="destructive" size="sm" onClick={onRemoveGroup}>
-            Remove Group
+            {group.isAdHoc ? 'Remove Enemy' : 'Remove Group'}
           </Button>
         </CardAction>
       </CardHeader>
@@ -93,11 +94,8 @@ export function MonsterGroupCard({
           <MonsterStandeeRow
             key={standee.id}
             standee={standee}
-            maxHp={
-              standee.rank === 'elite'
-                ? group.maxHpElite
-                : group.maxHpNormal
-            }
+            maxHp={getMonsterStandeeMaxHp(group, standee)}
+            label={group.isAdHoc ? 'Enemy' : undefined}
             onUpdateHp={(delta) => onUpdateStandeeHp(standee.id, delta)}
             onToggleCondition={(condition) =>
               onToggleStandeeCondition(standee.id, condition)
@@ -106,44 +104,46 @@ export function MonsterGroupCard({
           />
         ))}
 
-        <div className="mt-2 flex items-center gap-2">
-          <Input
-            type="number"
-            min={1}
-            aria-label="Standee number"
-            className="w-16"
-            value={standeeNumber}
-            onChange={(e) => {
-              const val = parseInt(e.target.value)
-              setCustomNumber(Number.isNaN(val) ? null : Math.max(1, val))
-            }}
-          />
-          <div className="flex overflow-hidden rounded-md border">
+        {!group.isAdHoc && (
+          <div className="mt-2 flex items-center gap-2">
+            <Input
+              type="number"
+              min={1}
+              aria-label="Standee number"
+              className="w-16"
+              value={standeeNumber}
+              onChange={(e) => {
+                const val = parseInt(e.target.value)
+                setCustomNumber(Number.isNaN(val) ? null : Math.max(1, val))
+              }}
+            />
+            <div className="flex overflow-hidden rounded-md border">
+              <Button
+                variant={selectedRank === 'normal' ? 'default' : 'ghost'}
+                size="sm"
+                className="rounded-none"
+                onClick={() => setSelectedRank('normal')}
+              >
+                Normal
+              </Button>
+              <Button
+                variant={selectedRank === 'elite' ? 'default' : 'ghost'}
+                size="sm"
+                className="rounded-none"
+                onClick={() => setSelectedRank('elite')}
+              >
+                Elite
+              </Button>
+            </div>
             <Button
-              variant={selectedRank === 'normal' ? 'default' : 'ghost'}
+              variant="outline"
               size="sm"
-              className="rounded-none"
-              onClick={() => setSelectedRank('normal')}
+              onClick={handleAddStandee}
             >
-              Normal
-            </Button>
-            <Button
-              variant={selectedRank === 'elite' ? 'default' : 'ghost'}
-              size="sm"
-              className="rounded-none"
-              onClick={() => setSelectedRank('elite')}
-            >
-              Elite
+              + Add Standee
             </Button>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleAddStandee}
-          >
-            + Add Standee
-          </Button>
-        </div>
+        )}
       </CardContent>
     </Card>
   )

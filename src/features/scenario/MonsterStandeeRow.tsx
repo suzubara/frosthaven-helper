@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 interface MonsterStandeeRowProps {
   standee: MonsterStandee
   maxHp: number
+  label?: string
   onUpdateHp: (delta: number) => void
   onToggleCondition: (condition: Condition) => void
   onKill: () => void
@@ -21,6 +22,7 @@ const RANK_LABEL: Record<MonsterStandee['rank'], string> = {
 export function MonsterStandeeRow({
   standee,
   maxHp,
+  label,
   onUpdateHp,
   onToggleCondition,
   onKill,
@@ -28,7 +30,9 @@ export function MonsterStandeeRow({
   if (!standee.alive) {
     return (
       <div className="flex items-center gap-2 opacity-40 py-1">
-        <span className="font-mono text-sm">#{standee.standeeNumber}</span>
+        <span className="font-mono text-sm">
+          {label ?? `#${standee.standeeNumber}`}
+        </span>
         <span>💀 dead</span>
       </div>
     )
@@ -45,7 +49,7 @@ export function MonsterStandeeRow({
           isElite && 'border-yellow-500 bg-yellow-500/20 text-yellow-700 dark:text-yellow-400',
         )}
       >
-        #{standee.standeeNumber} ({RANK_LABEL[standee.rank]})
+        {label ?? `#${standee.standeeNumber} (${RANK_LABEL[standee.rank]})`}
       </Badge>
 
       <div className="flex items-center gap-1">

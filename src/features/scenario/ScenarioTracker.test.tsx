@@ -150,4 +150,37 @@ describe('ScenarioTracker', () => {
       },
     })
   })
+
+  it('adds an ad hoc enemy with independent HP', async () => {
+    const user = userEvent.setup()
+    render(<ScenarioTracker />)
+
+    await user.click(screen.getByRole('button', { name: '+ Add Enemy' }))
+    await user.type(screen.getByLabelText('Enemy Name'), 'Ice Wraith')
+    await user.type(screen.getByLabelText('Enemy Max HP'), '17')
+    await user.click(screen.getByRole('button', { name: 'Add Enemy' }))
+
+    expect(mocks.dispatch).toHaveBeenCalledWith({
+      type: 'ADD_MONSTER_GROUP',
+      group: {
+        id: expect.any(String),
+        name: 'Ice Wraith',
+        maxHpNormal: 17,
+        maxHpElite: 17,
+        initiative: null,
+        isAdHoc: true,
+        standees: [
+          {
+            id: expect.any(String),
+            standeeNumber: 1,
+            rank: 'boss',
+            maxHp: 17,
+            currentHp: 17,
+            conditions: [],
+            alive: true,
+          },
+        ],
+      },
+    })
+  })
 })
